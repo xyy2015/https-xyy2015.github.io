@@ -3,71 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>访问验证</title>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;
-    background:radial-gradient(circle at 50% 30%,#0b1a2c,#03060a);
-    color:#e8eef5;min-height:100vh;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:16px;padding:20px;text-align:center}
-  h2{font-size:22px;letter-spacing:3px;color:#7fd1ff;text-shadow:0 0 16px rgba(127,209,255,.5)}
-  p{font-size:13px;color:#8aa0b5;line-height:1.7;max-width:380px}
-  .box{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-  input{width:240px;padding:12px 16px;border-radius:10px;border:1px solid rgba(127,209,255,.35);
-    background:rgba(255,255,255,.06);color:#e8eef5;font-size:17px;letter-spacing:5px;
-    text-align:center;outline:none;font-family:"Courier New",monospace}
-  input:focus{border-color:#7fd1ff;box-shadow:0 0 14px rgba(127,209,255,.35)}
-  button{padding:12px 22px;border:none;border-radius:10px;font-size:15px;font-weight:700;
-    cursor:pointer;letter-spacing:2px;background:linear-gradient(180deg,#6ff0ad,#2fbf74);
-    color:#06121b;transition:.15s}
-  button:active{transform:scale(.97)}
-  #msg{min-height:22px;font-size:13px;color:#ff6b6b;letter-spacing:1px}
-</style>
-</head>
-<body>
-  <h2>🔒 访问验证</h2>
-  <p>请输入访问密码后进入游戏。</p>
-  <div class="box">
-    <input id="passInput" type="password" inputmode="numeric" maxlength="10" placeholder="••••••••••" autocomplete="off">
-    <button id="unlockBtn">进入</button>
-  </div>
-  <div id="msg"></div>
-
-<script>
-const ACCESS_CODE = '2947638100';
-const params = new URLSearchParams(location.search);
-const target = params.get('next') || 'playgames.html';
-const input = document.getElementById('passInput');
-const msg = document.getElementById('msg');
-function tryUnlock(){
-  if(input.value.trim() === ACCESS_CODE){
-    location.href = target;
-  }else{
-    msg.textContent = '密码错误，请重新输入。';
-    input.value = '';
-    input.focus();
-  }
-}
-document.getElementById('unlockBtn').onclick = tryUnlock;
-input.addEventListener('keydown', e => { if(e.key === 'Enter') tryUnlock(); });
-input.focus();
-</script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>游戏大厅</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;
     background:radial-gradient(circle at 50% 0%,#12233a 0%,#05080c 70%);
-    color:#e8eef5;min-height:100vh;padding:28px 16px;display:flex;flex-direction:column;align-items:center}
+    color:#e8eef5;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;
+    padding:28px 16px}
+  /* 密码页 */
+  #lockScreen{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:16px;text-align:center;
+    background:radial-gradient(circle at 50% 30%,#0b1a2c,#03060a);padding:20px}
+  #lockScreen h2{font-size:22px;letter-spacing:3px;color:#7fd1ff;text-shadow:0 0 16px rgba(127,209,255,.5)}
+  #lockScreen p{font-size:13px;color:#8aa0b5;line-height:1.7;max-width:380px}
+  .lock-box{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  #passInput{width:240px;padding:12px 16px;border-radius:10px;border:1px solid rgba(127,209,255,.35);
+    background:rgba(255,255,255,.06);color:#e8eef5;font-size:17px;letter-spacing:5px;
+    text-align:center;outline:none;font-family:"Courier New",monospace}
+  #passInput:focus{border-color:#7fd1ff;box-shadow:0 0 14px rgba(127,209,255,.35)}
+  #unlockBtn{padding:12px 22px;border:none;border-radius:10px;font-size:15px;font-weight:700;
+    cursor:pointer;letter-spacing:2px;background:linear-gradient(180deg,#6ff0ad,#2fbf74);
+    color:#06121b;transition:.15s}
+  #unlockBtn:active{transform:scale(.97)}
+  #lockMsg{min-height:22px;font-size:13px;color:#ff6b6b;letter-spacing:1px}
+  /* 游戏大厅 */
+  #hall{display:none;flex-direction:column;align-items:center;width:100%}
   h1{font-size:26px;letter-spacing:4px;color:#7fd1ff;text-shadow:0 0 18px rgba(127,209,255,.5);margin-bottom:6px}
   .sub{font-size:13px;color:#8aa0b5;margin-bottom:26px;letter-spacing:1px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;width:100%;max-width:980px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;
+    width:100%;max-width:980px}
   .card{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
     border:1px solid rgba(127,209,255,.22);border-radius:16px;padding:20px;text-decoration:none;
     color:#e8eef5;display:flex;flex-direction:column;gap:8px;transition:.18s}
@@ -80,6 +44,20 @@ input.focus();
 </style>
 </head>
 <body>
+
+<!-- 密码页：初始只显示这个 -->
+<div id="lockScreen">
+  <h2>🔒 访问验证</h2>
+  <p>请输入访问密码后进入游戏大厅。</p>
+  <div class="lock-box">
+    <input id="passInput" type="password" inputmode="numeric" maxlength="10" placeholder="••••••••••" autocomplete="off">
+    <button id="unlockBtn">进入</button>
+  </div>
+  <div id="lockMsg"></div>
+</div>
+
+<!-- 游戏大厅：密码正确后才显示 -->
+<div id="hall">
   <h1>🎮 游戏大厅</h1>
   <div class="sub">四个游戏 · 点击进入</div>
   <div class="grid">
@@ -109,6 +87,29 @@ input.focus();
     </a>
   </div>
   <footer>GitHub Pages · 静态游戏合集</footer>
+</div>
+
+<script>
+const ACCESS_CODE = '2947638100';
+const lockScreen = document.getElementById('lockScreen');
+const hall = document.getElementById('hall');
+const input = document.getElementById('passInput');
+const msg = document.getElementById('lockMsg');
+
+function tryUnlock(){
+  if(input.value.trim() === ACCESS_CODE){
+    lockScreen.style.display = 'none';
+    hall.style.display = 'flex';
+  }else{
+    msg.textContent = '密码错误，请重新输入。';
+    input.value = '';
+    input.focus();
+  }
+}
+document.getElementById('unlockBtn').onclick = tryUnlock;
+input.addEventListener('keydown', e => { if(e.key === 'Enter') tryUnlock(); });
+input.focus();
+</script>
 </body>
 </html>
 <!DOCTYPE html>
