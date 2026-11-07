@@ -3,6 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>访问验证</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 50% 30%,#0b1a2c,#03060a);
+    color:#e8eef5;min-height:100vh;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:16px;padding:20px;text-align:center}
+  h2{font-size:22px;letter-spacing:3px;color:#7fd1ff;text-shadow:0 0 16px rgba(127,209,255,.5)}
+  p{font-size:13px;color:#8aa0b5;line-height:1.7;max-width:380px}
+  .box{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  input{width:240px;padding:12px 16px;border-radius:10px;border:1px solid rgba(127,209,255,.35);
+    background:rgba(255,255,255,.06);color:#e8eef5;font-size:17px;letter-spacing:5px;
+    text-align:center;outline:none;font-family:"Courier New",monospace}
+  input:focus{border-color:#7fd1ff;box-shadow:0 0 14px rgba(127,209,255,.35)}
+  button{padding:12px 22px;border:none;border-radius:10px;font-size:15px;font-weight:700;
+    cursor:pointer;letter-spacing:2px;background:linear-gradient(180deg,#6ff0ad,#2fbf74);
+    color:#06121b;transition:.15s}
+  button:active{transform:scale(.97)}
+  #msg{min-height:22px;font-size:13px;color:#ff6b6b;letter-spacing:1px}
+</style>
+</head>
+<body>
+  <h2>🔒 访问验证</h2>
+  <p>请输入访问密码后进入游戏。</p>
+  <div class="box">
+    <input id="passInput" type="password" inputmode="numeric" maxlength="10" placeholder="••••••••••" autocomplete="off">
+    <button id="unlockBtn">进入</button>
+  </div>
+  <div id="msg"></div>
+
+<script>
+const ACCESS_CODE = '2947638100';
+const params = new URLSearchParams(location.search);
+const target = params.get('next') || 'playgames.html';
+const input = document.getElementById('passInput');
+const msg = document.getElementById('msg');
+function tryUnlock(){
+  if(input.value.trim() === ACCESS_CODE){
+    location.href = target;
+  }else{
+    msg.textContent = '密码错误，请重新输入。';
+    input.value = '';
+    input.focus();
+  }
+}
+document.getElementById('unlockBtn').onclick = tryUnlock;
+input.addEventListener('keydown', e => { if(e.key === 'Enter') tryUnlock(); });
+input.focus();
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>游戏大厅</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -25,31 +81,31 @@
 </head>
 <body>
   <h1>🎮 游戏大厅</h1>
-  <div class="sub">四个游戏 · 每个都需要访问密码</div>
+  <div class="sub">四个游戏 · 点击进入</div>
   <div class="grid">
     <a class="card" href="border-checkpoint.html">
       <div class="icon">🛂</div>
       <h2>边境检查站</h2>
       <p>夜班检查站，对照 24 条规则判断放行或拦截。</p>
-      <div class="tag">模拟 · 判断 · 需要密码</div>
+      <div class="tag">模拟 · 判断</div>
     </a>
     <a class="card" href="ticket-agent.html">
       <div class="icon">✈️</div>
       <h2>飞机售票员</h2>
       <p>给旅客安排航班、核对证件、处理预算和行李。</p>
-      <div class="tag">经营 · 售票 · 需要密码</div>
+      <div class="tag">经营 · 售票</div>
     </a>
     <a class="card" href="snake.html">
       <div class="icon">🐍</div>
       <h2>贪吃蛇</h2>
       <p>经典贪吃蛇，方向键或触屏按钮控制。</p>
-      <div class="tag">街机 · 需要密码</div>
+      <div class="tag">街机</div>
     </a>
     <a class="card" href="breakout.html">
       <div class="icon">🧱</div>
       <h2>打砖块</h2>
       <p>移动挡板接球，打掉所有砖块。</p>
-      <div class="tag">街机 · 需要密码</div>
+      <div class="tag">街机</div>
     </a>
   </div>
   <footer>GitHub Pages · 静态游戏合集</footer>
@@ -125,18 +181,6 @@
     background:#7fd1ff;color:#06121b;font-weight:700}
   .upgrade button:disabled{background:#3a4b5c;color:#7a8b9c}
   .hint{font-size:11px;color:#8aa0b5;text-align:center}
-  #lockScreen{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;
-    justify-content:center;gap:14px;background:radial-gradient(circle at 50% 30%,#0b1a2c,#03060a);
-    padding:20px;text-align:center}
-  #lockScreen h2{font-size:20px;letter-spacing:3px;color:#7fd1ff}
-  #lockScreen p{font-size:12.5px;color:#8aa0b5;line-height:1.7;max-width:360px}
-  .lock-box{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  #passInput{width:220px;padding:11px 14px;border-radius:10px;border:1px solid rgba(127,209,255,.35);
-    background:rgba(255,255,255,.06);color:#e8eef5;font-size:16px;letter-spacing:4px;text-align:center;
-    outline:none;font-family:"Courier New",monospace}
-  #unlockBtn{padding:11px 20px;border:none;border-radius:10px;font-size:14px;font-weight:700;
-    cursor:pointer;background:linear-gradient(180deg,#6ff0ad,#2fbf74);color:#06121b}
-  #lockMsg{min-height:20px;font-size:13px;color:#ff6b6b}
   @media(max-width:720px){
     .booth-overlay{flex-direction:column;min-height:0}
     .driver-panel{flex:0 0 auto}
@@ -148,17 +192,7 @@
 </style>
 </head>
 <body>
-<div id="lockScreen">
-  <h2>🛂 边境检查站</h2>
-  <p>请输入访问密码后进入夜班。</p>
-  <div class="lock-box">
-    <input id="passInput" type="password" inputmode="numeric" maxlength="10" placeholder="••••••••••" autocomplete="off">
-    <button id="unlockBtn">进入</button>
-  </div>
-  <div id="lockMsg"></div>
-</div>
-
-<div id="app" style="display:none">
+<div id="app">
   <header>
     <h1>🛂 边境检查站</h1>
     <div class="stats">
@@ -288,19 +322,6 @@
 
 <script>
 const $=id=>document.getElementById(id);
-const ACCESS_CODE='2947638100';
-$('unlockBtn').onclick=()=>{
-  if($('passInput').value.trim()===ACCESS_CODE){
-    $('lockScreen').style.display='none';
-    $('app').style.display='flex';
-    startGame();
-  }else{
-    $('lockMsg').textContent='密码错误，请重新输入。';
-    $('passInput').value='';$('passInput').focus();
-  }
-};
-$('passInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('unlockBtn').click();});
-
 let started=false;
 let audioCtx=null;
 function beep(f,d,t='sine',v=.05){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
@@ -488,6 +509,7 @@ function startGame(){if(started)return;started=true;
 $('approve').onclick=()=>handleDecision(true);
 $('deny').onclick=()=>handleDecision(false);
 pickRules();renderRules();renderStats();renderShop();nextPerson();}
+startGame();
 </script>
 </body>
 </html>
@@ -535,33 +557,11 @@ pickRules();renderRules();renderStats();renderShop();nextPerson();}
   .feedback{min-height:40px;font-size:12.5px;text-align:center;line-height:1.55;
     background:rgba(0,0,0,.3);border-radius:8px;padding:6px 9px;border:1px solid rgba(127,209,255,.12)}
   .hint{font-size:11px;color:#8aa0b5;text-align:center;line-height:1.55}
-  #lockScreen{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;
-    justify-content:center;gap:14px;background:radial-gradient(circle at 50% 30%,#0b1a2c,#03060a);
-    padding:20px;text-align:center}
-  #lockScreen h2{font-size:20px;letter-spacing:3px;color:#7fd1ff}
-  #lockScreen p{font-size:12.5px;color:#8aa0b5;line-height:1.7;max-width:360px}
-  .lock-box{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  #passInput{width:220px;padding:11px 14px;border-radius:10px;border:1px solid rgba(127,209,255,.35);
-    background:rgba(255,255,255,.06);color:#e8eef5;font-size:16px;letter-spacing:4px;text-align:center;
-    outline:none;font-family:"Courier New",monospace}
-  #unlockBtn{padding:11px 20px;border:none;border-radius:10px;font-size:14px;font-weight:700;
-    cursor:pointer;background:linear-gradient(180deg,#6ff0ad,#2fbf74);color:#06121b}
-  #lockMsg{min-height:20px;font-size:13px;color:#ff6b6b}
   @media(max-width:600px){.passenger{flex-direction:column;align-items:flex-start}}
 </style>
 </head>
 <body>
-<div id="lockScreen">
-  <h2>✈️ 飞机售票员</h2>
-  <p>请输入访问密码后开始售票。</p>
-  <div class="lock-box">
-    <input id="passInput" type="password" inputmode="numeric" maxlength="10" placeholder="••••••••••" autocomplete="off">
-    <button id="unlockBtn">进入</button>
-  </div>
-  <div id="lockMsg"></div>
-</div>
-
-<div id="app" style="display:none">
+<div id="app">
   <header>
     <h1>✈️ 飞机售票员</h1>
     <div class="stats">
@@ -590,19 +590,6 @@ pickRules();renderRules();renderStats();renderShop();nextPerson();}
 
 <script>
 const $=id=>document.getElementById(id);
-const ACCESS_CODE='2947638100';
-$('unlockBtn').onclick=()=>{
-  if($('passInput').value.trim()===ACCESS_CODE){
-    $('lockScreen').style.display='none';
-    $('app').style.display='flex';
-    startGame();
-  }else{
-    $('lockMsg').textContent='密码错误，请重新输入。';
-    $('passInput').value='';$('passInput').focus();
-  }
-};
-$('passInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('unlockBtn').click();});
-
 const names=['阿列克谢','贝拉','卡洛斯','达莉亚','伊万','法蒂玛','格奥尔基','汉娜','尤里','泽维尔',
 '李明','王芳','佐藤','金敏','拉吉','安娜'];
 const skins=['#f3d0ae','#e0b48c','#c98f5f','#a86b3c','#8a5227','#f7ddc4'];
@@ -712,13 +699,9 @@ function nextPassenger(){
   $('sell').disabled=true;
   renderPassenger();renderFlights();
 }
-function startGame(){
-  if(state.started)return;
-  state.started=true;
-  $('sell').onclick=sell;
-  $('refuse').onclick=refuse;
-  nextPassenger();
-}
+$('sell').onclick=sell;
+$('refuse').onclick=refuse;
+nextPassenger();
 </script>
 </body>
 </html>
@@ -746,32 +729,9 @@ function startGame(){
   .hint{font-size:11.5px;color:#5a7a96;text-align:center;line-height:1.5}
   #restart{padding:8px 18px;border:none;border-radius:9px;background:#2fbf74;color:#06121b;
     font-weight:700;cursor:pointer;letter-spacing:1px}
-  #lockScreen{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;
-    justify-content:center;gap:14px;background:radial-gradient(circle at 50% 30%,#0b1a2c,#03060a);
-    padding:20px;text-align:center}
-  #lockScreen h2{font-size:20px;letter-spacing:3px;color:#5ee7a0}
-  #lockScreen p{font-size:12.5px;color:#8aa0b5;line-height:1.7;max-width:360px}
-  .lock-box{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  #passInput{width:220px;padding:11px 14px;border-radius:10px;border:1px solid rgba(127,209,255,.35);
-    background:rgba(255,255,255,.06);color:#e8eef5;font-size:16px;letter-spacing:4px;text-align:center;
-    outline:none;font-family:"Courier New",monospace}
-  #unlockBtn{padding:11px 20px;border:none;border-radius:10px;font-size:14px;font-weight:700;
-    cursor:pointer;background:linear-gradient(180deg,#6ff0ad,#2fbf74);color:#06121b}
-  #lockMsg{min-height:20px;font-size:13px;color:#ff6b6b}
 </style>
 </head>
 <body>
-<div id="lockScreen">
-  <h2>🐍 贪吃蛇</h2>
-  <p>请输入访问密码后开始游戏。</p>
-  <div class="lock-box">
-    <input id="passInput" type="password" inputmode="numeric" maxlength="10" placeholder="••••••••••" autocomplete="off">
-    <button id="unlockBtn">进入</button>
-  </div>
-  <div id="lockMsg"></div>
-</div>
-
-<div id="gameWrap" style="display:none;flex-direction:column;align-items:center;gap:10px">
   <h1>🐍 贪吃蛇</h1>
   <div id="info">得分：0 · 方向键或下方按钮控制</div>
   <canvas id="game" width="400" height="400"></canvas>
@@ -783,23 +743,9 @@ function startGame(){
   </div>
   <div class="hint">撞墙或撞自己结束 · 按空格或点“重开”重新开始</div>
   <button id="restart">重开</button>
-</div>
 
 <script>
 const $=id=>document.getElementById(id);
-const ACCESS_CODE='2947638100';
-$('unlockBtn').onclick=()=>{
-  if($('passInput').value.trim()===ACCESS_CODE){
-    $('lockScreen').style.display='none';
-    $('gameWrap').style.display='flex';
-    startGame();
-  }else{
-    $('lockMsg').textContent='密码错误，请重新输入。';
-    $('passInput').value='';$('passInput').focus();
-  }
-};
-$('passInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('unlockBtn').click();});
-
 const canvas=$('game'),ctx=canvas.getContext('2d');
 const grid=20,cols=canvas.width/grid,rows=canvas.height/grid;
 let snake,dir,food,score,timer,over;
@@ -843,7 +789,7 @@ document.addEventListener('keydown',e=>{
 });
 document.querySelectorAll('.pad button').forEach(b=>{b.onclick=()=>setDir(b.dataset.dir);});
 $('restart').onclick=init;
-function startGame(){init();}
+init();
 </script>
 </body>
 </html>
@@ -869,32 +815,9 @@ function startGame(){init();}
   .hint{font-size:11.5px;color:#5a7a96;text-align:center;line-height:1.5}
   #restart{padding:8px 18px;border:none;border-radius:9px;background:#7fd1ff;color:#06121b;
     font-weight:700;cursor:pointer;letter-spacing:1px}
-  #lockScreen{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;
-    justify-content:center;gap:14px;background:radial-gradient(circle at 50% 30%,#0b1a2c,#03060a);
-    padding:20px;text-align:center}
-  #lockScreen h2{font-size:20px;letter-spacing:3px;color:#7fd1ff}
-  #lockScreen p{font-size:12.5px;color:#8aa0b5;line-height:1.7;max-width:360px}
-  .lock-box{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  #passInput{width:220px;padding:11px 14px;border-radius:10px;border:1px solid rgba(127,209,255,.35);
-    background:rgba(255,255,255,.06);color:#e8eef5;font-size:16px;letter-spacing:4px;text-align:center;
-    outline:none;font-family:"Courier New",monospace}
-  #unlockBtn{padding:11px 20px;border:none;border-radius:10px;font-size:14px;font-weight:700;
-    cursor:pointer;background:linear-gradient(180deg,#6ff0ad,#2fbf74);color:#06121b}
-  #lockMsg{min-height:20px;font-size:13px;color:#ff6b6b}
 </style>
 </head>
 <body>
-<div id="lockScreen">
-  <h2>🧱 打砖块</h2>
-  <p>请输入访问密码后开始游戏。</p>
-  <div class="lock-box">
-    <input id="passInput" type="password" inputmode="numeric" maxlength="10" placeholder="••••••••••" autocomplete="off">
-    <button id="unlockBtn">进入</button>
-  </div>
-  <div id="lockMsg"></div>
-</div>
-
-<div id="gameWrap" style="display:none;flex-direction:column;align-items:center;gap:10px">
   <h1>🧱 打砖块</h1>
   <div id="info">得分：0 · 左右方向键或按钮移动挡板</div>
   <canvas id="game" width="480" height="400"></canvas>
@@ -904,23 +827,9 @@ function startGame(){init();}
   </div>
   <div class="hint">接住球，打掉所有砖块</div>
   <button id="restart">重开</button>
-</div>
 
 <script>
 const $=id=>document.getElementById(id);
-const ACCESS_CODE='2947638100';
-$('unlockBtn').onclick=()=>{
-  if($('passInput').value.trim()===ACCESS_CODE){
-    $('lockScreen').style.display='none';
-    $('gameWrap').style.display='flex';
-    startGame();
-  }else{
-    $('lockMsg').textContent='密码错误，请重新输入。';
-    $('passInput').value='';$('passInput').focus();
-  }
-};
-$('passInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('unlockBtn').click();});
-
 const canvas=$('game'),ctx=canvas.getContext('2d');
 const paddle={w:80,h:10,x:200,y:380,speed:7};
 const ball={x:240,y:300,r:6,dx:3,dy:-3};
@@ -987,7 +896,7 @@ document.querySelectorAll('.pad button').forEach(b=>{
   b.addEventListener('touchend',e=>{e.preventDefault();off();},{passive:false});
 });
 $('restart').onclick=reset;
-function startGame(){reset();setInterval(update,1000/60);}
+reset();setInterval(update,1000/60);
 </script>
 </body>
 </html>
