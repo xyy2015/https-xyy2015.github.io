@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>游戏大厅</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;
+    background:radial-gradient(circle at 50% 0%,#12233a 0%,#05080c 70%);
+    color:#e8eef5;min-height:100vh;padding:28px 16px;display:flex;flex-direction:column;align-items:center}
+  h1{font-size:26px;letter-spacing:4px;color:#7fd1ff;text-shadow:0 0 18px rgba(127,209,255,.5);margin-bottom:6px}
+  .sub{font-size:13px;color:#8aa0b5;margin-bottom:26px;letter-spacing:1px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;width:100%;max-width:980px}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
+    border:1px solid rgba(127,209,255,.22);border-radius:16px;padding:20px;text-decoration:none;
+    color:#e8eef5;display:flex;flex-direction:column;gap:8px;transition:.18s}
+  .card:hover{transform:translateY(-4px);border-color:#7fd1ff;box-shadow:0 12px 30px rgba(127,209,255,.18)}
+  .card .icon{font-size:38px}
+  .card h2{font-size:18px;letter-spacing:1px;color:#7fd1ff}
+  .card p{font-size:12.5px;color:#9fb3c8;line-height:1.6}
+  .card .tag{font-size:10.5px;color:#5ee7a0;letter-spacing:1px;margin-top:auto}
+  footer{margin-top:30px;font-size:11.5px;color:#5a7a96;letter-spacing:1px}
+</style>
+</head>
+<body>
+  <h1>🎮 游戏大厅</h1>
+  <div class="sub">四个游戏 · 统一密码 2947638100</div>
+  <div class="grid">
+    <a class="card" href="border-checkpoint.html">
+      <div class="icon">🛂</div>
+      <h2>边境检查站</h2>
+      <p>夜班检查站，对照 24 条规则判断放行或拦截。</p>
+      <div class="tag">模拟 · 判断 · 需要密码</div>
+    </a>
+    <a class="card" href="ticket-agent.html">
+      <div class="icon">✈️</div>
+      <h2>飞机售票员</h2>
+      <p>给旅客安排航班、核对证件、处理预算和行李。</p>
+      <div class="tag">经营 · 售票 · 需要密码</div>
+    </a>
+    <a class="card" href="snake.html">
+      <div class="icon">🐍</div>
+      <h2>贪吃蛇</h2>
+      <p>经典贪吃蛇，方向键或触屏按钮控制。</p>
+      <div class="tag">街机 · 需要密码</div>
+    </a>
+    <a class="card" href="breakout.html">
+      <div class="icon">🧱</div>
+      <h2>打砖块</h2>
+      <p>移动挡板接球，打掉所有砖块。</p>
+      <div class="tag">街机 · 需要密码</div>
+    </a>
+  </div>
+  <footer>GitHub Pages · 静态游戏合集</footer>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>边境检查站</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;background:#03060a;color:#e8eef5;
+    min-height:100vh;display:flex;justify-content:center;padding:10px;user-select:none;overflow-x:hidden}
+  #app{width:100%;max-width:1040px;display:flex;flex-direction:column;gap:9px}
+  header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  h1{font-size:18px;letter-spacing:2px;color:#7fd1ff;text-shadow:0 0 14px rgba(127,209,255,.5)}
+  .stats{display:flex;gap:6px;flex-wrap:wrap}
+  .stat{background:rgba(255,255,255,.055);border:1px solid rgba(127,209,255,.2);border-radius:8px;
+    padding:3px 10px;font-size:11.5px;min-width:74px;text-align:center}
+  .stat b{display:block;font-size:15px;color:#7fd1ff;margin-top:1px}
+  .stat.warn b{color:#ff6b6b}
+  .rules{background:rgba(127,209,255,.06);border-left:3px solid #7fd1ff;border-radius:7px;
+    padding:7px 11px;font-size:11.5px;line-height:1.55;max-height:118px;overflow-y:auto}
+  .rules h2{font-size:11.5px;color:#7fd1ff;margin-bottom:2px}
+  .rules .rule{display:block;margin-bottom:1px}
+  .rules .rule b{color:#ffe08a}
+  .scene{position:relative;border-radius:13px;overflow:hidden;border:1px solid rgba(127,209,255,.22);
+    box-shadow:0 16px 50px rgba(0,0,0,.7);min-height:460px;background:#060b12}
+  .scene svg.bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .booth-overlay{position:relative;z-index:3;display:flex;gap:12px;padding:13px;min-height:460px;align-items:stretch}
+  .driver-panel{flex:0 0 196px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:4px}
+  .driver-wrap{position:relative;width:180px;height:225px;filter:drop-shadow(0 9px 20px rgba(0,0,0,.75))}
+  .driver-wrap svg{width:100%;height:100%}
+  .veh-tag{margin-top:3px;font-size:11.5px;color:#cfe4f5;background:rgba(0,0,0,.55);padding:3px 9px;
+    border-radius:18px;border:1px solid rgba(127,209,255,.28);text-align:center}
+  .veh-tag .meta{display:block;font-size:9.5px;color:#8aa0b5;margin-top:1px}
+  .doc-panel{flex:1;display:flex;flex-direction:column;gap:7px;justify-content:center;min-width:0}
+  .document{position:relative;background:linear-gradient(135deg,#fdfaf2,#e7dfcc);color:#1a1a1a;
+    border-radius:9px;padding:10px 12px;display:grid;grid-template-columns:66px 1fr;gap:10px;
+    box-shadow:0 8px 24px rgba(0,0,0,.55),inset 0 0 0 1px #cfc6b0;overflow:hidden}
+  .document::after{content:"PASSPORT";position:absolute;right:-14px;bottom:-14px;font-size:50px;
+    font-weight:900;color:rgba(0,0,0,.045);transform:rotate(-14deg);pointer-events:none}
+  .avatar-box{width:66px;height:82px;border-radius:4px;overflow:hidden;border:2px solid #a89c82;background:#cfd8e0}
+  .avatar-box svg{width:100%;height:100%;display:block}
+  .doc-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:3px 9px;
+    font-size:11.5px;position:relative;z-index:1}
+  .doc-fields div{border-bottom:1px dashed rgba(0,0,0,.15);padding-bottom:1px}
+  .doc-fields span{display:block;font-size:8.5px;color:#6b6250;text-transform:uppercase}
+  .mrz{grid-column:1/-1;margin-top:3px;font-family:"Courier New",monospace;font-size:9.5px;
+    background:rgba(0,0,0,.045);padding:3px 5px;border-radius:3px;word-break:break-all}
+  .bad{color:#b3261e;font-weight:700}.good{color:#1b6e3a;font-weight:700}
+  .feedback{min-height:38px;font-size:12px;text-align:center;line-height:1.5;background:rgba(0,0,0,.35);
+    border-radius:7px;padding:4px 8px;border:1px solid rgba(127,209,255,.12)}
+  .actions{display:flex;gap:8px}
+  button{flex:1;padding:11px;border:none;border-radius:10px;font-size:14.5px;font-weight:700;
+    cursor:pointer;letter-spacing:2px;transition:.14s;color:#06121b}
+  #approve{background:linear-gradient(180deg,#6ff0ad,#2fbf74)}
+  #deny{background:linear-gradient(180deg,#ff9a9a,#e04b4b);color:#fff}
+  .stamp{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%) rotate(-18deg) scale(2.4);
+    font-size:29px;font-weight:900;padding:4px 18px;border:4px solid;border-radius:8px;opacity:0;
+    pointer-events:none;z-index:9}
+  .stamp.show{animation:stampIn .48s forwards}
+  .stamp.ok{color:#2fbf74;border-color:#2fbf74}.stamp.no{color:#e04b4b;border-color:#e04b4b}
+  @keyframes stampIn{0%{opacity:0;transform:translate(-50%,-50%) rotate(-18deg) scale(2.4)}
+    60%{opacity:1;transform:translate(-50%,-50%) rotate(-18deg) scale(1)}
+    100%{opacity:.96;transform:translate(-50%,-50%) rotate(-18deg) scale(1)}}
+  .shop{display:grid;grid-template-columns:repeat(auto-fit,minmax(184px,1fr));gap:7px}
+  .upgrade{background:rgba(255,255,255,.05);border:1px solid rgba(127,209,255,.17);border-radius:10px;
+    padding:7px 10px;font-size:11.5px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+  .upgrade button{flex:0 0 auto;padding:4px 10px;font-size:11px;letter-spacing:0;border-radius:6px;
+    background:#7fd1ff;color:#06121b;font-weight:700}
+  .upgrade button:disabled{background:#3a4b5c;color:#7a8b9c}
+  .hint{font-size:11px;color:#8aa0b5;text-align:center}
+  #lockScreen{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:14px;background:radial-gradient(circle at 50% 30%,#0b1a2c,#03060a);
+    padding:20px;text-align:center}
+  #lockScreen h2{font-size:20px;letter-spacing:3px;color:#7fd1ff}
+  #lockScreen p{font-size:12.5px;color:#8aa0b5;line-height:1.7;max-width:360px}
+  .lock-box{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  #passInput{width:220px;padding:11px 14px;border-radius:10px;border:1px solid rgba(127,209,255,.35);
+    background:rgba(255,255,255,.06);color:#e8eef5;font-size:16px;letter-spacing:4px;text-align:center;
+    outline:none;font-family:"Courier New",monospace}
+  #unlockBtn{padding:11px 20px;border:none;border-radius:10px;font-size:14px;font-weight:700;
+    cursor:pointer;background:linear-gradient(180deg,#6ff0ad,#2fbf74);color:#06121b}
+  #lockMsg{min-height:20px;font-size:13px;color:#ff6b6b}
+  @media(max-width:720px){
+    .booth-overlay{flex-direction:column;min-height:0}
+    .driver-panel{flex:0 0 auto}
+    .driver-wrap{width:140px;height:175px}
+    .document{grid-template-columns:56px 1fr}
+    .avatar-box{width:56px;height:70px}
+    .scene{min-height:0}
+  }
+</style>
+</head>
+<body>
+<div id="lockScreen">
+  <h2>🛂 边境检查站</h2>
+  <p>请输入 10 位访问密码后进入夜班。</p>
+  <div class="lock-box">
+    <input id="passInput" type="password" inputmode="numeric" maxlength="10" placeholder="••••••••••" autocomplete="off">
+    <button id="unlockBtn">进入</button>
+  </div>
+  <div id="lockMsg"></div>
+</div>
+
+<div id="app" style="display:none">
+  <header>
+    <h1>🛂 边境检查站</h1>
+    <div class="stats">
+      <div class="stat">第几天<b id="day">1</b></div>
+      <div class="stat">工资<b id="money">$0</b></div>
+      <div class="stat">声誉<b id="rep">100</b></div>
+      <div class="stat">剩余<b id="left">8</b></div>
+    </div>
+  </header>
+  <div class="rules"><h2>📋 今日生效规则</h2><div id="ruleList"></div></div>
+  <div class="scene">
+    <svg class="bg" viewBox="0 0 1000 460" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#050b14"/><stop offset="45%" stop-color="#0b1a2c"/>
+          <stop offset="75%" stop-color="#12283f"/><stop offset="100%" stop-color="#1a3550"/>
+        </linearGradient>
+        <linearGradient id="road" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#232a32"/><stop offset="55%" stop-color="#181d24"/>
+          <stop offset="100%" stop-color="#0c0f13"/>
+        </linearGradient>
+        <linearGradient id="lampBeam" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffe9a8" stop-opacity=".5"/>
+          <stop offset="55%" stop-color="#ffe9a8" stop-opacity=".1"/>
+          <stop offset="100%" stop-color="#ffe9a8" stop-opacity="0"/>
+        </linearGradient>
+        <radialGradient id="glowWarm" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffe9a8" stop-opacity=".75"/>
+          <stop offset="45%" stop-color="#ffd98a" stop-opacity=".2"/>
+          <stop offset="100%" stop-color="#ffd98a" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="glowRed" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ff3b3b" stop-opacity=".85"/>
+          <stop offset="45%" stop-color="#ff3b3b" stop-opacity=".25"/>
+          <stop offset="100%" stop-color="#ff3b3b" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="glowBlue" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#3b6bff" stop-opacity=".85"/>
+          <stop offset="45%" stop-color="#3b6bff" stop-opacity=".25"/>
+          <stop offset="100%" stop-color="#3b6bff" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#9fd8ff" stop-opacity=".15"/>
+          <stop offset="50%" stop-color="#9fd8ff" stop-opacity=".03"/>
+          <stop offset="100%" stop-color="#9fd8ff" stop-opacity=".11"/>
+        </linearGradient>
+        <linearGradient id="wet" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#7fd1ff" stop-opacity=".15"/>
+          <stop offset="100%" stop-color="#7fd1ff" stop-opacity="0"/>
+        </linearGradient>
+        <filter id="blur6"><feGaussianBlur stdDeviation="6"/></filter>
+        <filter id="blur1"><feGaussianBlur stdDeviation="1.2"/></filter>
+      </defs>
+      <rect width="1000" height="460" fill="url(#sky)"/>
+      <ellipse cx="720" cy="40" rx="360" ry="90" fill="#7fb6ff" opacity=".05" filter="url(#blur6)"/>
+      <g fill="#dcebff">
+        <circle cx="70" cy="32" r="1.3"/><circle cx="150" cy="66" r=".9"/><circle cx="240" cy="28" r="1.1"/>
+        <circle cx="330" cy="74" r=".8"/><circle cx="420" cy="36" r="1.4"/><circle cx="520" cy="58" r=".9"/>
+        <circle cx="610" cy="24" r="1.2"/><circle cx="700" cy="70" r=".8"/><circle cx="790" cy="34" r="1.3"/>
+        <circle cx="880" cy="60" r=".9"/><circle cx="950" cy="30" r="1.1"/>
+      </g>
+      <circle cx="840" cy="70" r="26" fill="#eef5ff" opacity=".92" filter="url(#blur1)"/>
+      <circle cx="840" cy="70" r="52" fill="url(#glowWarm)" opacity=".22"/>
+      <path d="M0 236 L90 182 L170 218 L250 172 L340 212 L430 168 L520 210 L620 176 L720 214 L820 180 L910 216 L1000 186 L1000 286 L0 286 Z" fill="#0a1626" opacity=".95"/>
+      <path d="M0 264 L120 226 L230 258 L340 224 L460 260 L580 228 L700 262 L820 230 L920 260 L1000 236 L1000 308 L0 308 Z" fill="#071220"/>
+      <rect x="0" y="300" width="1000" height="160" fill="url(#road)"/>
+      <rect x="0" y="300" width="1000" height="56" fill="url(#wet)"/>
+      <g stroke="#e8eef5" stroke-opacity=".26" stroke-width="4" stroke-dasharray="30 26">
+        <line x1="0" y1="398" x2="1000" y2="398"/>
+      </g>
+      <g stroke="#33465a" stroke-width="3"><line x1="0" y1="300" x2="1000" y2="300"/></g>
+      <g>
+        <rect x="150" y="96" width="7" height="204" fill="#2b3d4f"/>
+        <path d="M153 100 q-40 -24 -84 -6" stroke="#2b3d4f" stroke-width="6" fill="none"/>
+        <circle cx="71" cy="96" r="8" fill="#fff3c4"/><circle cx="71" cy="96" r="30" fill="url(#glowWarm)"/>
+        <path d="M71 100 L-40 300 L190 300 Z" fill="url(#lampBeam)" opacity=".5"/>
+      </g>
+      <g>
+        <rect x="912" y="120" width="6" height="180" fill="#2b3d4f"/>
+        <path d="M915 122 q-34 -20 -68 0" stroke="#2b3d4f" stroke-width="5" fill="none"/>
+        <circle cx="847" cy="122" r="7" fill="#ffe9a8"/><circle cx="847" cy="122" r="38" fill="url(#glowWarm)"/>
+        <path d="M847 128 L790 300 L900 300 Z" fill="url(#lampBeam)" opacity=".32"/>
+      </g>
+      <g>
+        <rect x="34" y="128" width="168" height="172" rx="7" fill="#182635" stroke="#2f4356" stroke-width="2"/>
+        <rect x="34" y="128" width="168" height="24" rx="7" fill="#223447"/>
+        <rect x="52" y="162" width="132" height="90" rx="4" fill="#08121c" stroke="#3a5064" stroke-width="2"/>
+        <rect x="52" y="162" width="132" height="90" rx="4" fill="url(#glassGrad)"/>
+        <line x1="118" y1="162" x2="118" y2="252" stroke="#2f4356" stroke-width="2"/>
+        <ellipse cx="118" cy="208" rx="66" ry="44" fill="#ffd98a" opacity=".1" filter="url(#blur6)"/>
+        <rect x="48" y="252" width="140" height="8" rx="2" fill="#223447" stroke="#2f4356"/>
+        <rect x="64" y="266" width="94" height="34" rx="3" fill="#0d1a26" stroke="#2f4356"/>
+        <circle cx="148" cy="284" r="3" fill="#7fd1ff" opacity=".7"/>
+        <text x="118" y="145" text-anchor="middle" font-size="10" fill="#7fd1ff" letter-spacing="2">BORDER CONTROL</text>
+        <circle cx="118" cy="120" r="9" fill="#ffe9a8"/><circle cx="118" cy="120" r="30" fill="url(#glowWarm)"/>
+      </g>
+      <g>
+        <rect x="690" y="286" width="130" height="34" rx="8" fill="#101b26" stroke="#2b3d4f"/>
+        <rect x="706" y="266" width="98" height="26" rx="7" fill="#16232f" stroke="#2b3d4f"/>
+        <rect x="738" y="252" width="34" height="12" rx="4" fill="#0d1a26" stroke="#2b3d4f"/>
+        <circle id="policeRed" cx="747" cy="250" r="22" fill="url(#glowRed)" opacity=".8"/>
+        <circle id="policeBlue" cx="763" cy="250" r="22" fill="url(#glowBlue)" opacity=".25"/>
+      </g>
+    </svg>
+    <div class="booth-overlay">
+      <div class="driver-panel">
+        <div class="driver-wrap"><svg id="driverSvg" viewBox="0 0 200 250"></svg></div>
+        <div class="veh-tag" id="vehTag">一辆小轿车<span class="meta">司机递来证件</span></div>
+      </div>
+      <div class="doc-panel">
+        <div class="document">
+          <div class="photo-col"><div class="avatar-box" id="avatarBox"></div></div>
+          <div class="doc-fields" id="docFields"></div>
+        </div>
+        <div class="feedback" id="feedback"></div>
+        <div class="actions">
+          <button id="approve">✅ 放行</button>
+          <button id="deny">⛔ 拦截</button>
+        </div>
+      </div>
+    </div>
+    <div class="stamp" id="stamp"></div>
+  </div>
+  <div class="shop" id="shop"></div>
+  <div class="hint">只按“今日生效规则”判。放对 +$12 / +2 声誉；放错 -$10 / -14 声誉。</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const ACCESS_CODE='2947638100';
+$('unlockBtn').onclick=()=>{
+  if($('passInput').value.trim()===ACCESS_CODE){
+    $('lockScreen').style.display='none';
+    $('app').style.display='flex';
+    startGame();
+  }else{
+    $('lockMsg').textContent='密码错误，请重新输入。';
+    $('passInput').value='';$('passInput').focus();
+  }
+};
+$('passInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('unlockBtn').click();});
+
+let started=false;
+let audioCtx=null;
+function beep(f,d,t='sine',v=.05){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t;o.frequency.value=f;
+g.gain.setValueAtTime(v,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+d);
+o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+d);}catch(e){}}
+const sfxOk=()=>{beep(660,.12,'triangle');setTimeout(()=>beep(880,.18,'triangle'),90)};
+const sfxNo=()=>{beep(200,.18,'sawtooth');setTimeout(()=>beep(140,.25,'sawtooth'),100)};
+let pp=0;setInterval(()=>{pp=1-pp;const r=$('policeRed'),b=$('policeBlue');
+if(r&&b){r.setAttribute('opacity',pp?.85:.2);b.setAttribute('opacity',pp?.2:.85);}},620);
+
+const countries=[{name:'中国',code:'CHN'},{name:'美国',code:'USA'},{name:'俄罗斯',code:'RUS'},
+{name:'德国',code:'DEU'},{name:'法国',code:'FRA'},{name:'日本',code:'JPN'},{name:'韩国',code:'KOR'},
+{name:'印度',code:'IND'},{name:'巴西',code:'BRA'},{name:'澳大利亚',code:'AUS'},{name:'加拿大',code:'CAN'},
+{name:'英国',code:'GBR'},{name:'意大利',code:'ITA'},{name:'西班牙',code:'ESP'},{name:'墨西哥',code:'MEX'},
+{name:'土耳其',code:'TUR'},{name:'埃及',code:'EGY'},{name:'南非',code:'ZAF'},{name:'越南',code:'VNM'},
+{name:'泰国',code:'THA'}];
+const visaFree=['日本','韩国','德国','法国','意大利','西班牙','澳大利亚','英国','加拿大'];
+const names=['阿列克谢','贝拉','卡洛斯','达莉亚','伊万','法蒂玛','格奥尔基','汉娜','尤里','泽维尔',
+'李明','王芳','佐藤','金敏','拉吉','安娜','穆罕默德','索菲亚'];
+const vehicles=[{icon:'🚗',name:'一辆小轿车',type:'car'},{icon:'🚚',name:'一辆货车',type:'truck'},
+{icon:'🏍️',name:'一辆摩托车',type:'moto'},{icon:'🚌',name:'一辆大巴',type:'bus'}];
+const skins=['#f3d0ae','#e0b48c','#c98f5f','#a86b3c','#8a5227','#f7ddc4'];
+const hairs=['#141414','#2a1a10','#4a2e1a','#6b4a2b','#a0522d','#c9b28a','#8c8c8c'];
+let state={day:1,money:0,rep:100,left:8,rules:[],current:null,
+  upgrades:{scanner:false,database:false,lounge:false}};
+const rand=a=>a[Math.floor(Math.random()*a.length)];
+const randInt=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pad=n=>String(n).padStart(2,'0');
+function dateStr(off=0){const d=new Date(2026,10,7);d.setDate(d.getDate()+off);
+return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+
+const rulePool=[
+{id:'passport6m',text:'护照有效期不足 6 个月者禁止入境',check:p=>p.expiry<'2027-05-07',reason:p=>'护照 '+p.expiry+' 到期，不足 6 个月'},
+{id:'expired',text:'护照已过期者禁止入境',check:p=>p.expiry<'2026-11-07',reason:p=>'护照已于 '+p.expiry+' 过期'},
+{id:'visaRequired',text:'无有效签证者禁止入境',check:p=>!p.hasVisa&&!visaFree.includes(p.country),reason:()=>'无有效签证'},
+{id:'visaType',text:'签证类型与入境目的不符者拦截',check:p=>p.hasVisa&&p.visaType!==p.purpose,reason:p=>'持'+p.visaType+'签证，目的为'+p.purpose},
+{id:'stayOver',text:'停留天数超过签证允许天数者拦截',check:p=>p.stayDays>p.allowedStay,reason:p=>'申请停留 '+p.stayDays+' 天，签证仅允许 '+p.allowedStay+' 天'},
+{id:'returnTicket',text:'无回程/续程机票者禁止入境',check:p=>!p.hasReturnTicket,reason:()=>'无回程或续程机票'},
+{id:'accommodation',text:'无住宿证明者禁止入境',check:p=>!p.hasAccommodation,reason:()=>'无酒店订单或住宿证明'},
+{id:'funds',text:'资金证明不足者禁止入境',check:p=>p.funds<p.requiredFunds,reason:p=>'资金 $'+p.funds+'，要求至少 $'+p.requiredFunds},
+{id:'wanted',text:'通缉/禁入名单人员立即拦截',check:p=>p.wanted,reason:()=>'通缉或禁入名单匹配'},
+{id:'nameMismatch',text:'证件姓名与本人不符者拦截',check:p=>p.nameMismatch,reason:()=>'证件姓名与本人不符'},
+{id:'fingerprint',text:'指纹与证件芯片不匹配者拦截',check:p=>!p.fingerprintMatch,reason:()=>'指纹与芯片记录不匹配'},
+{id:'minorConsent',text:'未成年人无监护人同意书者拦截',check:p=>p.age<18&&!p.guardianConsent,reason:p=>p.age+' 岁，无监护人同意书'},
+{id:'workPermit',text:'持旅游签证从事工作者拦截',check:p=>p.visaType==='旅游'&&p.purpose==='工作',reason:()=>'旅游签证从事工作'},
+{id:'transitVisa',text:'过境旅客无过境签证者拦截',check:p=>p.purpose==='过境'&&!p.hasTransitVisa,reason:()=>'过境无过境签证'},
+{id:'truckPermit',text:'货车无跨境通行许可者拦截',check:p=>p.vehicle.type==='truck'&&!p.hasPermit,reason:()=>'货车无跨境通行许可'},
+{id:'quarantine',text:'来自检疫疫区者需隔离，禁止入境',check:p=>p.fromQuarantineZone,reason:p=>'来自检疫疫区 '+p.country},
+{id:'animalProduct',text:'携带未申报动植物制品者拦截',check:p=>p.hasAnimalProduct&&!p.declared,reason:()=>'携带未申报动植物制品'},
+{id:'cashLimit',text:'携带现金超等值 1 万美元未申报者拦截',check:p=>p.cash>10000&&!p.declared,reason:p=>'携带 $'+p.cash+' 未申报'},
+{id:'overstayHistory',text:'有逾期滞留记录者拦截',check:p=>p.overstayHistory,reason:()=>'有逾期滞留记录'},
+{id:'deportHistory',text:'曾被驱逐出境者拦截',check:p=>p.deportHistory,reason:()=>'曾被驱逐出境'},
+{id:'passportPages',text:'护照空白页不足 2 页者拦截',check:p=>p.blankPages<2,reason:p=>'护照仅剩 '+p.blankPages+' 页空白页'},
+{id:'passportDamage',text:'护照严重破损者拦截',check:p=>p.damagedPassport,reason:()=>'护照严重破损'},
+{id:'visaExpired',text:'签证已过期者禁止入境',check:p=>p.hasVisa&&p.visaExpiry<'2026-11-07',reason:p=>'签证已于 '+p.visaExpiry+' 过期'},
+{id:'purposeMismatch',text:'入境目的与申报不符者拦截',check:p=>p.purpose!==p.declaredPurpose,reason:p=>'申报'+p.declaredPurpose+'，实际'+p.purpose}
+];
+
+function makePerson(){
+  const c=rand(countries),v=rand(vehicles);
+  const age=randInt(16,72);
+  const purpose=rand(['旅游','商务','工作','探亲','过境']);
+  const visaType=rand(['旅游','商务','工作','过境']);
+  const funds=randInt(200,12000);
+  const requiredFunds=randInt(300,1500);
+  const stayDays=randInt(3,120);
+  const allowedStay=randInt(7,90);
+  const hasVisa=Math.random()>.2;
+  const visaExpiry=dateStr(randInt(-200,500));
+  return{
+    name:rand(names),country:c.name,countryCode:c.code,vehicle:v,
+    skin:rand(skins),hair:rand(hairs),hairStyle:randInt(0,2),
+    beard:Math.random()<.25,glasses:Math.random()<.3,
+    passportNo:'P'+randInt(1000000,9999999),
+    birth:(2026-age)+'-'+pad(randInt(1,12))+'-'+pad(randInt(1,28)),
+    age,expiry:dateStr(randInt(-300,900)),
+    hasVisa,visaType,visaExpiry,purpose,declaredPurpose:purpose,
+    stayDays,allowedStay,funds,requiredFunds,
+    hasReturnTicket:Math.random()>.25,
+    hasAccommodation:Math.random()>.2,
+    hasTransitVisa:Math.random()>.4,
+    wanted:Math.random()<.16,
+    nameMismatch:Math.random()<.1,
+    fingerprintMatch:Math.random()>.12,
+    guardianConsent:Math.random()>.4,
+    fromQuarantineZone:Math.random()<.15,
+    hasAnimalProduct:Math.random()<.2,
+    declared:Math.random()>.3,
+    cash:randInt(0,25000),
+    overstayHistory:Math.random()<.1,
+    deportHistory:Math.random()<.06,
+    blankPages:randInt(0,8),
+    damagedPassport:Math.random()<.08,
+    hasPermit:Math.random()>.4
+  };
+}
+
+function pickRules(){
+  const pool=[...rulePool],picked=[];
+  const count=Math.min(6+Math.floor(state.day/2),8);
+  while(picked.length<count&&pool.length)picked.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
+  state.rules=picked;
+}
+const violations=p=>state.rules.filter(r=>r.check(p));
+
+function driverSVG(p){
+  const hairBack={0:'<path d="M62 96 q4 -40 38 -40 q34 0 38 40 q-6 -18 -22 -24 q-16 -6 -32 0 q-16 6 -22 24 Z" fill="'+p.hair+'"/>',
+1:'<path d="M58 100 q-6 40 4 62 q8 -24 10 -46 q10 -20 38 -20 q28 0 38 20 q2 22 10 46 q10 -22 4 -62 q-12 -32 -52 -32 q-40 0 -52 32 Z" fill="'+p.hair+'"/>',
+2:'<path d="M64 94 q36 -26 72 0 q4 8 0 12 q-36 -18 -72 0 q-4 -4 0 -12 Z" fill="'+p.hair+'" opacity=".85"/>'}[p.hairStyle];
+  const hairFront={0:'<path d="M66 96 q10 -16 34 -16 q24 0 34 16 q-8 -10 -20 -12 q-14 -4 -28 0 q-12 2 -20 12 Z" fill="'+p.hair+'"/>',
+1:'<path d="M66 98 q10 -18 34 -18 q24 0 34 18 q-6 -10 -16 -13 q-16 -5 -36 0 q-10 3 -16 13 Z" fill="'+p.hair+'"/>',
+2:'<path d="M68 96 q8 -14 32 -14 q24 0 32 14 q-8 -7 -18 -9 q-14 -3 -28 0 q-10 2 -18 9 Z" fill="'+p.hair+'" opacity=".9"/>'}[p.hairStyle];
+  const beard=p.beard?'<path d="M74 130 q26 24 52 0 q-4 24 -26 28 q-22 -4 -26 -28 Z" fill="'+p.hair+'" opacity=".8"/>':'';
+  const glasses=p.glasses?'<g stroke="#1f1f1f" stroke-width="2.6" fill="none"><circle cx="84" cy="114" r="11"/><circle cx="116" cy="114" r="11"/><line x1="95" y1="114" x2="105" y2="114"/><line x1="73" y1="112" x2="62" y2="107"/><line x1="127" y1="112" x2="138" y2="107"/></g>':'';
+  return '<svg viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="faceShade" cx="50%" cy="42%" r="62%"><stop offset="60%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".28"/></radialGradient><linearGradient id="uniform" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2b4258"/><stop offset="100%" stop-color="#16232f"/></linearGradient></defs><path d="M32 250 q0 -64 58 -74 q58 10 58 74 Z" fill="url(#uniform)" stroke="#0d1a26" stroke-width="2"/><path d="M70 184 q30 -10 60 0 l-7 26 q-23 -9 -46 0 Z" fill="#101c28"/><rect x="36" y="196" width="22" height="9" rx="2" fill="#c9a227" opacity=".85"/><rect x="142" y="196" width="22" height="9" rx="2" fill="#c9a227" opacity=".85"/><path d="M93 184 l7 12 l-7 30 l-7 -30 Z" fill="#1a2735"/><path d="M86 184 l14 14 l14 -14" stroke="#0a1620" stroke-width="3" fill="none"/><rect x="90" y="150" width="20" height="30" rx="8" fill="'+p.skin+'"/><rect x="90" y="150" width="20" height="12" rx="6" fill="rgba(0,0,0,.14)"/><ellipse cx="60" cy="118" rx="6.5" ry="10" fill="'+p.skin+'"/><ellipse cx="140" cy="118" rx="6.5" ry="10" fill="'+p.skin+'"/>'+hairBack+'<ellipse cx="100" cy="114" rx="40" ry="46" fill="'+p.skin+'"/>'+hairFront+'<path d="M77 100 q9 -5 18 0" stroke="'+p.hair+'" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="M105 100 q9 -5 18 0" stroke="'+p.hair+'" stroke-width="3.2" fill="none" stroke-linecap="round"/><ellipse cx="86" cy="112" rx="4.4" ry="5.4" fill="#141414"/><ellipse cx="114" cy="112" rx="4.4" ry="5.4" fill="#141414"/><circle cx="87.6" cy="110.4" r="1.5" fill="#fff" opacity=".9"/><circle cx="115.6" cy="110.4" r="1.5" fill="#fff" opacity=".9"/><path d="M100 114 q-3 9 2 13" stroke="rgba(0,0,0,.28)" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M90 136 q10 7 20 0" stroke="#8d4a3a" stroke-width="2.6" fill="none" stroke-linecap="round"/>'+beard+'<ellipse cx="100" cy="114" rx="40" ry="46" fill="url(#faceShade)"/>'+glasses+'</svg>';
+}
+
+function avatarSVG(p){
+  const hairBack={0:'<path d="M14 40 q1 -25 19 -25 q18 0 19 25 q-3 -13 -19 -13 q-16 0 -19 13 Z" fill="'+p.hair+'"/>',
+1:'<path d="M12 42 q-2 16 2 26 q4 -11 5 -20 q4 -9 14 -9 q10 0 14 9 q1 9 5 20 q4 -10 2 -26 q-5 -15 -21 -15 q-16 0 -21 15 Z" fill="'+p.hair+'"/>',
+2:'<path d="M15 39 q3 -16 18 -16 q15 0 18 16 q-3 -6 -18 -6 q-15 0 -18 6 Z" fill="'+p.hair+'" opacity=".85"/>'}[p.hairStyle];
+  const hairFront={0:'<path d="M16 40 q4 -10 17 -10 q13 0 17 10 q-4 -5 -9 -6 q-8 -2 -16 0 q-5 1 -9 6 Z" fill="'+p.hair+'"/>',
+1:'<path d="M16 41 q4 -12 17 -12 q13 0 17 12 q-3 -6 -8 -8 q-9 -3 -18 0 q-5 2 -8 8 Z" fill="'+p.hair+'"/>',
+2:'<path d="M17 40 q3 -9 16 -9 q13 0 16 9 q-4 -4 -9 -5 q-7 -2 -14 0 q-5 1 -9 5 Z" fill="'+p.hair+'" opacity=".9"/>'}[p.hairStyle];
+  return '<svg viewBox="0 0 66 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"><rect width="66" height="80" fill="#cfd8e0"/><rect y="58" width="66" height="22" fill="#3a4b5c"/><ellipse cx="14" cy="38" rx="3" ry="4.5" fill="'+p.skin+'"/><ellipse cx="52" cy="38" rx="3" ry="4.5" fill="'+p.skin+'"/>'+hairBack+'<ellipse cx="33" cy="37" rx="18" ry="21" fill="'+p.skin+'"/>'+hairFront+'<path d="M23 31 q5 -3 10 0" stroke="'+p.hair+'" stroke-width="1.8" fill="none"/><path d="M33 31 q5 -3 10 0" stroke="'+p.hair+'" stroke-width="1.8" fill="none"/><ellipse cx="26" cy="36" rx="2.3" ry="2.9" fill="#141414"/><ellipse cx="40" cy="36" rx="2.3" ry="2.9" fill="#141414"/><path d="M28 47 q5 4 10 0" stroke="#8d4a3a" stroke-width="1.7" fill="none"/><rect x="18" y="58" width="30" height="22" fill="#24384a"/><path d="M28 58 l5 8 l5 -8" stroke="#0c1620" stroke-width="2" fill="none"/></svg>';
+}
+
+function renderRules(){$('ruleList').innerHTML=state.rules.map((r,i)=>'<span class="rule"><b>'+(i+1)+'.</b> '+r.text+'</span>').join('');}
+function renderStats(){$('day').textContent=state.day;$('money').textContent='$'+state.money;
+$('rep').textContent=state.rep;$('left').textContent=state.left;
+$('rep').parentElement.classList.toggle('warn',state.rep<=30);}
+function renderPerson(){const p=state.current;if(!p)return;
+$('driverSvg').innerHTML=driverSVG(p);$('avatarBox').innerHTML=avatarSVG(p);
+$('vehTag').innerHTML=p.vehicle.name+'<span class="meta">'+p.country+' · '+p.purpose+'</span>';
+const expired=p.expiry<'2026-11-07';const visaExpired=p.hasVisa&&p.visaExpiry<'2026-11-07';
+const fields=[['姓名',p.name+(p.nameMismatch&&state.upgrades.database?' <span class="bad">(不符)</span>':'')],
+['国籍',p.country],['年龄',p.age+' 岁'],['护照号',p.passportNo],
+['护照到期','<span class="'+(expired?'bad':'good')+'">'+p.expiry+'</span>'],
+['签证',p.hasVisa?'<span class="'+(visaExpired?'bad':'good')+'">'+p.visaType+'（'+p.visaExpiry+'）</span>':'<span class="bad">无</span>'],
+['入境目的',p.purpose],['申请停留',p.stayDays+' 天 / 允许 '+p.allowedStay+' 天'],
+['资金','$'+p.funds+' / 要求 $'+p.requiredFunds],
+['回程票',p.hasReturnTicket?'<span class="good">有</span>':'<span class="bad">无</span>'],
+['住宿',p.hasAccommodation?'<span class="good">有</span>':'<span class="bad">无</span>'],
+['过境签',p.purpose==='过境'?(p.hasTransitVisa?'<span class="good">有</span>':'<span class="bad">无</span>'):'—'],
+['指纹',p.fingerprintMatch?'<span class="good">匹配</span>':'<span class="bad">不匹配</span>'],
+['空白页',p.blankPages+' 页'],
+['申报',p.declared?'<span class="good">已申报</span>':'<span class="bad">未申报</span>'],
+['现金','$'+p.cash],
+['通行许可',p.vehicle.type==='truck'?(p.hasPermit?'<span class="good">有</span>':'<span class="bad">无</span>'):'—']];
+if(p.age<18)fields.push(['监护人同意',p.guardianConsent?'<span class="good">有</span>':'<span class="bad">无</span>']);
+if(state.upgrades.scanner&&p.wanted)fields.push(['扫描','<span class="bad">⚠ 通缉匹配</span>']);
+const mrz='P<'+p.countryCode+'<'+p.name.toUpperCase().replace(/[^A-Z]/g,'')+'<<<<<<<<<<<br>'+p.passportNo+p.countryCode+'<'+p.birth.replace(/-/g,'')+'<'+p.expiry.replace(/-/g,'')+'<<<<<<<<<<<<<<';
+$('docFields').innerHTML=fields.map(f=>'<div><span>'+f[0]+'</span>'+f[1]+'</div>').join('')+'<div class="mrz">'+mrz+'</div>';}
+
+function renderShop(){const items=[{key:'scanner',name:'🔍 扫描仪',desc:'标出通缉匹配',cost:60},
+{key:'database',name:'🗄️ 数据库',desc:'标出姓名不符',cost:80},
+{key:'lounge',name:'☕ 休息室',desc:'每天多 2 辆车',cost:100}];
+$('shop').innerHTML=items.map(it=>{const o=state.upgrades[it.key];
+return '<div class="upgrade"><div><b>'+it.name+'</b><br>'+it.desc+'</div><button data-key="'+it.key+'" '+(o||state.money<it.cost?'disabled':'')+'>'+(o?'已拥有':'$'+it.cost)+'</button></div>';}).join('');
+$('shop').querySelectorAll('button').forEach(b=>b.onclick=()=>buy(b.dataset.key));}
+function buy(key){const c={scanner:60,database:80,lounge:100};
+if(state.upgrades[key]||state.money<c[key])return;
+state.money-=c[key];state.upgrades[key]=true;beep(520,.1,'square');renderShop();renderStats();}
+
+function nextPerson(){if(state.left<=0){endDay();return;}
+state.current=makePerson();$('feedback').textContent='';$('stamp').className='stamp';renderPerson();}
+function handleDecision(approve){const p=state.current;if(!p)return;
+const vs=violations(p),shouldDeny=vs.length>0,correct=approve?!shouldDeny:shouldDeny;
+const st=$('stamp');st.className='stamp '+(correct?'ok':'no');
+st.textContent=correct?(approve?'放行':'拦截'):'误判';
+st.classList.remove('show');void st.offsetWidth;st.classList.add('show');
+if(correct){state.money+=12;state.rep=Math.min(100,state.rep+2);sfxOk();
+$('feedback').innerHTML='<span class="good">✅ 正确！</span> '+(shouldDeny?vs.map(v=>v.reason(p)).join('；'):'所有生效规则均未违反，放行。');}
+else{state.money-=10;state.rep-=14;sfxNo();
+$('feedback').innerHTML='<span class="bad">❌ 错误！</span> '+(shouldDeny?'本应拦截：'+vs.map(v=>v.reason(p)).join('；'):'该旅客未违反任何生效规则。');}
+state.left--;renderStats();renderShop();
+if(state.rep<=0){setTimeout(()=>{alert('声誉归零，你被解雇了。\n坚持到第 '+state.day+' 天，共赚 $'+state.money+'。');location.reload();},600);return;}
+setTimeout(()=>state.left<=0?endDay():nextPerson(),correct?900:1500);}
+function endDay(){state.day++;state.left=8+(state.upgrades.lounge?2:0);state.money+=20;
+pickRules();renderRules();renderStats();renderShop();
+$('feedback').innerHTML='<span class="good">🌙 新的一天，规则已更新。</span>';setTimeout(nextPerson,800);}
+
+function startGame(){if(started)return;started=true;
+$('approve').onclick=()=>handleDecision(true);
+$('deny').onclick=()=>handleDecision(false);
+pickRules();renderRules();renderStats();renderShop();nextPerson();}
+</script>
+</body>
+</html>
