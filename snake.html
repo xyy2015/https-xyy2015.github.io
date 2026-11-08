@@ -11,6 +11,7 @@
     gap:10px;padding:12px;user-select:none}
   h1{font-size:19px;letter-spacing:3px;color:#5ee7a0}
   #info{font-size:13.5px;color:#9fb3c8}
+  #info b{color:#5ee7a0}
   canvas{background:#111820;border:2px solid #2a3a4a;border-radius:10px;max-width:100%;touch-action:none}
   .pad{display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(2,48px);
     gap:6px;margin-top:4px}
@@ -26,7 +27,7 @@
 </head>
 <body>
   <h1>🐍 贪吃蛇</h1>
-  <div id="info">得分：0 · 方向键或下方按钮控制</div>
+  <div id="info">得分：<b id="score">0</b> · 最高：<b id="best">0</b></div>
   <canvas id="game" width="400" height="400"></canvas>
   <div class="pad">
     <button class="up" data-dir="up">▲</button>
@@ -39,26 +40,43 @@
 
 <script>
 const $=id=>document.getElementById(id);
+const USER=localStorage.getItem('game_user')||'guest';
+const SAVE_KEY='snake_best_'+USER;
 const canvas=$('game'),ctx=canvas.getContext('2d');
 const grid=20,cols=canvas.width/grid,rows=canvas.height/grid;
-let snake,dir,food,score,timer,over;
+let snake,dir,food,score,timer,over,best;
+
+function loadBest(){
+  try{return JSON.parse(localStorage.getItem(SAVE_KEY)||'{}').best||0;}catch(e){return 0;}
+}
+function saveBest(){
+  if(score>best){
+    best=score;
+    localStorage.setItem(SAVE_KEY,JSON.stringify({best:best}));
+    $('best').textContent=best;
+  }
+}
+
 function init(){
   snake=[{x:5,y:5}];dir={x:1,y:0};score=0;over=false;
-  placeFood();updateInfo();clearInterval(timer);timer=setInterval(step,120);draw();
+  $('score').textContent=0;
+  placeFood();clearInterval(timer);timer=setInterval(step,120);draw();
 }
 function placeFood(){
   do{food={x:Math.floor(Math.random()*cols),y:Math.floor(Math.random()*rows)};}
   while(snake.some(s=>s.x===food.x&&s.y===food.y));
 }
-function updateInfo(){$('info').textContent='得分：'+score+' · 方向键或下方按钮控制';}
 function step(){
   if(over)return;
   const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
   if(head.x<0||head.x>=cols||head.y<0||head.y>=rows||snake.some(s=>s.x===head.x&&s.y===head.y)){
-    over=true;clearInterval(timer);setTimeout(()=>alert('游戏结束！得分：'+score),50);return;
+    over=true;clearInterval(timer);saveBest();
+    setTimeout(()=>alert('游戏结束！得分：'+score+' · 最高：'+best),50);return;
   }
   snake.unshift(head);
-  if(head.x===food.x&&head.y===food.y){score++;updateInfo();placeFood();}else snake.pop();
+  if(head.x===food.x&&head.y===food.y){
+    score++;$('score').textContent=score;placeFood();
+  }else snake.pop();
   draw();
 }
 function draw(){
@@ -82,6 +100,9 @@ document.addEventListener('keydown',e=>{
 });
 document.querySelectorAll('.pad button').forEach(b=>{b.onclick=()=>setDir(b.dataset.dir);});
 $('restart').onclick=init;
+
+best=loadBest();
+$('best').textContent=best;
 init();
 </script>
 </body>
