@@ -11,79 +11,89 @@
     color:#e8eef5;min-height:100vh;display:flex;justify-content:center;
     align-items:flex-start;padding:28px 16px}
   #lock{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:16px;text-align:center;
+    align-items:center;justify-content:center;gap:14px;text-align:center;
     background:radial-gradient(circle at 50% 30%,#0b1a2c,#03060a);padding:20px}
   #lock h2{font-size:22px;letter-spacing:3px;color:#7fd1ff;text-shadow:0 0 16px rgba(127,209,255,.5)}
-  #lock p{font-size:13px;color:#8aa0b5;line-height:1.7;max-width:380px}
-  .lock-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-  #pass{width:240px;padding:12px 16px;border-radius:10px;border:1px solid rgba(127,209,255,.35);
-    background:rgba(255,255,255,.06);color:#e8eef5;font-size:17px;letter-spacing:5px;
-    text-align:center;outline:none;font-family:"Courier New",monospace}
-  #pass:focus{border-color:#7fd1ff;box-shadow:0 0 14px rgba(127,209,255,.35)}
-  #enter{padding:12px 22px;border:none;border-radius:10px;font-size:15px;font-weight:700;
-    cursor:pointer;letter-spacing:2px;background:linear-gradient(180deg,#6ff0ad,#2fbf74);
-    color:#06121b}
-  #msg{min-height:22px;font-size:13px;color:#ff6b6b;letter-spacing:1px}
+  #lock p{font-size:12.5px;color:#8aa0b5;line-height:1.7;max-width:420px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  #lock input{width:200px;padding:11px 14px;border-radius:10px;border:1px solid rgba(127,209,255,.35);
+    background:rgba(255,255,255,.06);color:#e8eef5;font-size:15px;text-align:center;outline:none}
+  #lock input:focus{border-color:#7fd1ff;box-shadow:0 0 12px rgba(127,209,255,.35)}
+  #lock button{padding:11px 22px;border:none;border-radius:10px;font-size:14px;font-weight:700;
+    cursor:pointer;letter-spacing:2px;background:linear-gradient(180deg,#6ff0ad,#2fbf74);color:#06121b}
+  #msg{min-height:20px;font-size:12.5px;color:#ff6b6b}
   #hall{display:none;flex-direction:column;align-items:center;width:100%}
-  h1{font-size:26px;letter-spacing:4px;color:#7fd1ff;text-shadow:0 0 18px rgba(127,209,255,.5);margin-bottom:6px}
-  .sub{font-size:13px;color:#8aa0b5;margin-bottom:26px;letter-spacing:1px}
+  h1{font-size:26px;letter-spacing:4px;color:#7fd1ff;text-shadow:0 0 18px rgba(127,209,255,.5);margin-bottom:4px}
+  .sub{font-size:12.5px;color:#8aa0b5;margin-bottom:8px}
+  .userbar{font-size:12.5px;color:#9fb3c8;margin-bottom:20px}
+  .userbar b{color:#5ee7a0}
+  .userbar button{margin-left:10px;padding:4px 10px;border-radius:7px;border:1px solid rgba(127,209,255,.3);
+    background:rgba(255,255,255,.05);color:#cfe4f5;cursor:pointer;font-size:11.5px}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;
-    width:100%;max-width:980px}
+    width:100%;max-width:1000px}
   .card{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
-    border:1px solid rgba(127,209,255,.22);border-radius:16px;padding:20px;text-decoration:none;
-    color:#e8eef5;display:flex;flex-direction:column;gap:8px;transition:.18s}
+    border:1px solid rgba(127,209,255,.22);border-radius:16px;padding:18px;text-decoration:none;
+    color:#e8eef5;display:flex;flex-direction:column;gap:6px;transition:.18s}
   .card:hover{transform:translateY(-4px);border-color:#7fd1ff;box-shadow:0 12px 30px rgba(127,209,255,.18)}
-  .card .icon{font-size:38px}
-  .card h2{font-size:18px;letter-spacing:1px;color:#7fd1ff}
-  .card p{font-size:12.5px;color:#9fb3c8;line-height:1.6}
+  .card .icon{font-size:34px}
+  .card h2{font-size:17px;letter-spacing:1px;color:#7fd1ff}
+  .card p{font-size:12px;color:#9fb3c8;line-height:1.55}
   .card .tag{font-size:10.5px;color:#5ee7a0;letter-spacing:1px;margin-top:auto}
-  footer{margin-top:30px;font-size:11.5px;color:#5a7a96;letter-spacing:1px}
+  .card .save{font-size:10.5px;color:#8aa0b5;margin-top:2px}
+  footer{margin-top:26px;font-size:11px;color:#5a7a96;letter-spacing:1px}
 </style>
 </head>
 <body>
 
 <div id="lock">
-  <h2>🔒 访问验证</h2>
-  <p>请输入访问密码后进入游戏大厅。</p>
-  <div class="lock-row">
-    <input id="pass" type="password" inputmode="numeric" maxlength="10" placeholder="••••••••••" autocomplete="off">
-    <button id="enter">进入</button>
+  <h2>🔒 账号登录</h2>
+  <p>输入账号和邀请码进入大厅。账号和邀请码必须匹配。</p>
+  <div class="row">
+    <input id="acc" placeholder="账号（如 xyy）" autocomplete="off">
+    <input id="code" placeholder="邀请码（如 2015）" autocomplete="off">
   </div>
+  <div class="row"><button id="enter">进入</button></div>
   <div id="msg"></div>
 </div>
 
 <div id="hall">
   <h1>🎮 游戏大厅</h1>
-  <div class="sub">五个游戏 · 点击进入</div>
+  <div class="sub">五个游戏 · 每个游戏独立存档</div>
+  <div class="userbar">当前账号：<b id="who">-</b><button id="logout">退出登录</button></div>
   <div class="grid">
     <a class="card" href="border-checkpoint.html">
       <div class="icon">🛂</div>
       <h2>边境检查站</h2>
       <p>夜班检查站，对照 24 条规则判断放行或拦截。</p>
+      <div class="save" id="save-border">存档：无</div>
       <div class="tag">模拟 · 判断</div>
     </a>
     <a class="card" href="ticket-agent.html">
       <div class="icon">✈️</div>
       <h2>飞机售票员</h2>
       <p>给旅客安排航班、核对证件、处理预算和行李。</p>
+      <div class="save" id="save-ticket">存档：无</div>
       <div class="tag">经营 · 售票</div>
     </a>
     <a class="card" href="snake.html">
       <div class="icon">🐍</div>
       <h2>贪吃蛇</h2>
       <p>经典贪吃蛇，方向键或触屏按钮控制。</p>
+      <div class="save" id="save-snake">存档：无</div>
       <div class="tag">街机</div>
     </a>
     <a class="card" href="breakout.html">
       <div class="icon">🧱</div>
       <h2>打砖块</h2>
       <p>移动挡板接球，打掉所有砖块。</p>
+      <div class="save" id="save-breakout">存档：无</div>
       <div class="tag">街机</div>
     </a>
     <a class="card" href="racing3d.html">
       <div class="icon">🏎️</div>
       <h2>3D 赛车</h2>
       <p>伪 3D 赛道，左右变道躲车，速度越来越快。</p>
+      <div class="save" id="save-racing">存档：无</div>
       <div class="tag">竞速 · 3D 视觉</div>
     </a>
   </div>
@@ -91,28 +101,92 @@
 </div>
 
 <script>
+/* 账号 → 邀请码 映射 */
+const ACCOUNTS = {
+  'xyy': '2015',
+  '001': '100',
+  '002': '200',
+  '003': '300',
+  '004': '400'
+};
+
 (function(){
-  var CODE = '2947638100';
   var lock = document.getElementById('lock');
   var hall = document.getElementById('hall');
-  var input = document.getElementById('pass');
   var msg = document.getElementById('msg');
+  var accInput = document.getElementById('acc');
+  var codeInput = document.getElementById('code');
 
-  function unlock(){
-    if(input.value.trim() === CODE){
-      lock.parentNode.removeChild(lock);
-      hall.style.display = 'flex';
-    }else{
-      msg.textContent = '密码错误，请重新输入。';
-      input.value = '';
-      input.focus();
+  function login(){
+    var a = accInput.value.trim();
+    var c = codeInput.value.trim();
+    if(!ACCOUNTS[a]){
+      msg.textContent = '账号不存在。';
+      return;
     }
+    if(ACCOUNTS[a] !== c){
+      msg.textContent = '邀请码与账号不匹配。';
+      return;
+    }
+    localStorage.setItem('game_user', a);
+    showHall(a);
   }
-  document.getElementById('enter').onclick = unlock;
-  input.addEventListener('keydown', function(e){
-    if(e.key === 'Enter') unlock();
-  });
-  input.focus();
+
+  function showHall(a){
+    lock.style.display = 'none';
+    hall.style.display = 'flex';
+    document.getElementById('who').textContent = a;
+    refreshSaves(a);
+  }
+
+  function refreshSaves(a){
+    var map = {
+      'save-border': ['border_save_', '边境检查站'],
+      'save-ticket': ['ticket_save_', '飞机售票员'],
+      'save-snake': ['snake_best_', '贪吃蛇'],
+      'save-breakout': ['breakout_best_', '打砖块'],
+      'save-racing': ['racing_best_', '3D 赛车']
+    };
+    Object.keys(map).forEach(function(id){
+      var key = map[id][0] + a;
+      var v = localStorage.getItem(key);
+      var el = document.getElementById(id);
+      if(v === null || v === ''){
+        el.textContent = '存档：无';
+      }else{
+        el.textContent = '存档：' + formatSave(map[id][1], v);
+      }
+    });
+  }
+
+  function formatSave(game, v){
+    try{
+      var o = JSON.parse(v);
+      if(game === '边境检查站') return '第 ' + (o.day||1) + ' 天 · $' + (o.money||0);
+      if(game === '飞机售票员') return '$' + (o.money||0) + ' · 售 ' + (o.sold||0);
+      if(game === '贪吃蛇') return '最高 ' + (o.best||0) + ' 分';
+      if(game === '打砖块') return '最高 ' + (o.best||0) + ' 分';
+      if(game === '3D 赛车') return '最高 ' + (o.best||0) + ' 分';
+    }catch(e){}
+    return '有存档';
+  }
+
+  document.getElementById('enter').onclick = login;
+  accInput.addEventListener('keydown', function(e){ if(e.key==='Enter') codeInput.focus(); });
+  codeInput.addEventListener('keydown', function(e){ if(e.key==='Enter') login(); });
+
+  document.getElementById('logout').onclick = function(){
+    localStorage.removeItem('game_user');
+    location.reload();
+  };
+
+  // 自动登录
+  var saved = localStorage.getItem('game_user');
+  if(saved && ACCOUNTS[saved]){
+    showHall(saved);
+  }else{
+    accInput.focus();
+  }
 })();
 </script>
 </body>
