@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>打砖块</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;background:#0a0f14;color:#e8eef5;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:10px;padding:12px;user-select:none}
+  h1{font-size:19px;letter-spacing:3px;color:#7fd1ff}
+  #info{font-size:13.5px;color:#9fb3c8}
+  canvas{background:#101a26;border:2px solid #2a3a4a;border-radius:10px;max-width:100%;touch-action:none}
+  .pad{display:flex;gap:10px;margin-top:4px}
+  .pad button{width:96px;height:48px;border:1px solid rgba(127,209,255,.35);
+    background:rgba(127,209,255,.08);color:#7fd1ff;border-radius:10px;font-size:20px;
+    cursor:pointer;transition:.12s}
+  .pad button:active{background:rgba(127,209,255,.25);transform:scale(.96)}
+  .hint{font-size:11.5px;color:#5a7a96;text-align:center;line-height:1.5}
+  #restart{padding:8px 18px;border:none;border-radius:9px;background:#7fd1ff;color:#06121b;
+    font-weight:700;cursor:pointer;letter-spacing:1px}
+</style>
+</head>
+<body>
+  <h1>🧱 打砖块</h1>
+  <div id="info">得分：0 · 左右方向键或按钮移动挡板</div>
+  <canvas id="game" width="480" height="400"></canvas>
+  <div class="pad">
+    <button data-dir="left">◀</button>
+    <button data-dir="right">▶</button>
+  </div>
+  <div class="hint">接住球，打掉所有砖块</div>
+  <button id="restart">重开</button>
+
+<script>
+const $=id=>document.getElementById(id);
+const canvas=$('game'),ctx=canvas.getContext('2d');
+const paddle={w:80,h:10,x:200,y:380,speed:7};
+const ball={x:240,y:300,r:6,dx:3,dy:-3};
+let bricks=[],score=0,left=false,right=false,running=true;
+function initBricks(){
+  bricks=[];const cols=8,rows=4,bw=54,bh=18,pad=4,ox=12,oy=40;
+  for(let c=0;c<cols;c++){
+    bricks[c]=[];
+    for(let r=0;r<rows;r++){
+      bricks[c][r]={x:ox+c*(bw+pad),y:oy+r*(bh+pad),w:bw,h:bh,alive:true};
+    }
+  }
+}
+function reset(){
+  paddle.x=200;ball.x=240;ball.y=300;ball.dx=3;ball.dy=-3;
+  score=0;running=true;initBricks();updateInfo();draw();
+}
+function updateInfo(){$('info').textContent='得分：'+score+' · 左右方向键或按钮移动挡板';}
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#e94560';ctx.fillRect(paddle.x,paddle.y,paddle.w,paddle.h);
+  ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fillStyle='#f5f5f5';ctx.fill();
+  const colors=['#e94560','#f5a623','#50e3c2','#4a90e2'];
+  bricks.forEach((col,ci)=>col.forEach(b=>{
+    if(b.alive){ctx.fillStyle=colors[ci%colors.length];ctx.fillRect(b.x,b.y,b.w,b.h);}
+  }));
+}
+function update(){
+  if(!running)return;
+  if(left&&paddle.x>0)paddle.x-=paddle.speed;
+  if(right&&paddle.x<canvas.width-paddle.w)paddle.x+=paddle.speed;
+  ball.x+=ball.dx;ball.y+=ball.dy;
+  if(ball.x+ball.r>canvas.width||ball.x-ball.r<0)ball.dx*=-1;
+  if(ball.y-ball.r<0)ball.dy*=-1;
+  if(ball.y+ball.r>paddle.y&&ball.x>paddle.x&&ball.x<paddle.x+paddle.w){
+    ball.dy=-Math.abs(ball.dy);ball.dx+=(ball.x-(paddle.x+paddle.w/2))*0.05;
+  }
+  bricks.forEach(col=>col.forEach(b=>{
+    if(!b.alive)return;
+    if(ball.x>b.x&&ball.x<b.x+b.w&&ball.y>b.y&&ball.y<b.y+b.h){
+      b.alive=false;ball.dy*=-1;score++;updateInfo();
+    }
+  }));
+  if(ball.y-ball.r>canvas.height){running=false;setTimeout(()=>alert('游戏结束！得分：'+score),50);}
+  if(bricks.flat().every(b=>!b.alive)){running=false;setTimeout(()=>alert('你赢了！得分：'+score),50);}
+  draw();
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft')left=true;
+  if(e.key==='ArrowRight')right=true;
+});
+document.addEventListener('keyup',e=>{
+  if(e.key==='ArrowLeft')left=false;
+  if(e.key==='ArrowRight')right=false;
+});
+document.querySelectorAll('.pad button').forEach(b=>{
+  const dir=b.dataset.dir;
+  const on=()=>{if(dir==='left')left=true;else right=true;};
+  const off=()=>{if(dir==='left')left=false;else right=false;};
+  b.addEventListener('mousedown',on);
+  b.addEventListener('mouseup',off);
+  b.addEventListener('mouseleave',off);
+  b.addEventListener('touchstart',e=>{e.preventDefault();on();},{passive:false});
+  b.addEventListener('touchend',e=>{e.preventDefault();off();},{passive:false});
+});
+$('restart').onclick=reset;
+reset();setInterval(update,1000/60);
+</script>
+</body>
+</html>
