@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D 赛车</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;background:#05080c;color:#e8eef5;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:10px;padding:12px;user-select:none;overflow:hidden}
+  h1{font-size:19px;letter-spacing:3px;color:#7fd1ff}
+  #hud{display:flex;gap:16px;font-size:14px;color:#9fb3c8}
+  #hud b{color:#5ee7a0}
+  canvas{background:#0a1420;border:2px solid #2a3a4a;border-radius:12px;max-width:100%;touch-action:none}
+  .pad{display:flex;gap:10px;margin-top:4px}
+  .pad button{width:110px;height:50px;border:1px solid rgba(127,209,255,.35);
+    background:rgba(127,209,255,.08);color:#7fd1ff;border-radius:10px;font-size:22px;
+    cursor:pointer;transition:.12s}
+  .pad button:active{background:rgba(127,209,255,.25);transform:scale(.96)}
+  .hint{font-size:11.5px;color:#5a7a96;text-align:center;line-height:1.5}
+  #restart{padding:8px 18px;border:none;border-radius:9px;background:#7fd1ff;color:#06121b;
+    font-weight:700;cursor:pointer;letter-spacing:1px}
+</style>
+</head>
+<body>
+  <h1>🏎️ 3D 赛车</h1>
+  <div id="hud">速度 <b id="speed">0</b> km/h · 得分 <b id="score">0</b> · 最佳 <b id="best">0</b></div>
+  <canvas id="game" width="480" height="520"></canvas>
+  <div class="pad">
+    <button data-dir="left">◀</button>
+    <button data-dir="right">▶</button>
+  </div>
+  <div class="hint">左右方向键或按钮变道 · 躲开迎面车辆 · 撞车结束</div>
+  <button id="restart">重开</button>
+
+<script>
+const $=id=>document.getElementById(id);
+const canvas=$('game'),ctx=canvas.getContext('2d');
+const W=canvas.width,H=canvas.height;
+
+// 透视参数
+const roadTopW=120, roadBotW=420;
+const roadTopY=120, roadBotY=H-40;
+const centerX=W/2;
+
+let state;
+
+function initState(){
+  state={
+    playerLane:1,          // 0 左, 1 中, 2 右
+    speed:0,               // 0~1 速度系数
+    score:0,
+    best:Number(localStorage.getItem('racing3d_best')||0),
+    obstacles:[],          // {lane, z, type, color}
+    stripeOffset:0,
+    running:true,
+    lastTime:0,
+    spawnTimer:0
+  };
+  $('best').textContent=state.best;
+}
+
+// 车道中心在底部的 x
+function laneX(lane,z){
+  // z: 0 最近, 1 最远
+  const t=1-z;
+  const w=roadTopW+(roadBotW-roadTopW)*t;
+  const left=centerX-w/2;
+  const laneW=w/3;
+  return left+laneW*(lane+0.5);
+}
+function roadY(z){
+  return roadTopY+(roadBotY-roadTopY)*z;
+}
+function roadWidth(z){
+  const t=1-z;
+  return roadTopW+(roadBotW-roadTopW)*t;
+}
+
+function spawnObstacle(){
+  if(!state.running)return;
+  const lane=Math.floor(Math.random()*3);
+  // 避免和已有太近
+  if(state.obstacles.some(o=>o.lane===lane&&o.z>0.85))return;
+  state.obstacles.push({
+    lane, z:0.02,
+    type:Math.random()<0.2?'truck':'car',
+    color:['#e94560','#f5a623','#50e3c2','#4a90e2','#c084fc'][Math.floor(Math.random()*5)]
+  });
+}
+
+function drawRoad(){
+  // 天空
+  const sky=ctx.createLinearGradient(0,0,0,roadTopY);
+  sky.addColorStop(0,'#0b1a2c');
+  sky.addColorStop(1,'#1a3550');
+  ctx.fillStyle=sky;
+  ctx.fillRect(0,0,W,roadTopY);
+
+  // 远山
+  ctx.fillStyle='#0a1626';
+  ctx.beginPath();
+  ctx.moveTo(0,roadTopY);
+  ctx.lineTo(80,roadTopY-40);
+  ctx.lineTo(160,roadTopY-10);
+  ctx.lineTo(260,roadTopY-55);
+  ctx.lineTo(360,roadTopY-15);
+  ctx.lineTo(440,roadTopY-45);
+  ctx.lineTo(W,roadTopY-5);
+  ctx.lineTo(W,roadTopY);
+  ctx.closePath();
+  ctx.fill();
+
+  // 地面
+  const ground=ctx.createLinearGradient(0,roadTopY,0,H);
+  ground.addColorStop(0,'#12202e');
+  ground.addColorStop(1,'#070d14');
+  ctx.fillStyle=ground;
+  ctx.fillRect(0,roadTopY,W,H-roadTopY);
+
+  // 路面
+  ctx.fillStyle='#1a2430';
+  ctx.beginPath();
+  ctx.moveTo(centerX-roadTopW/2,roadTopY);
+  ctx.lineTo(centerX+roadTopW/2,roadTopY);
+  ctx.lineTo(centerX+roadBotW/2,roadBotY);
+  ctx.lineTo(centerX-roadBotW/2,roadBotY);
+  ctx.closePath();
+  ctx.fill();
+
+  // 路肩
+  ctx.strokeStyle='#2f4356';
+  ctx.lineWidth=3;
+  ctx.beginPath();
+  ctx.moveTo(centerX-roadTopW/2,roadTopY);
+  ctx.lineTo(centerX-roadBotW/2,roadBotY);
+  ctx.moveTo(centerX+roadTopW/2,roadTopY);
+  ctx.lineTo(centerX+roadBotW/2,roadBotY);
+  ctx.stroke();
+
+  // 车道虚线（透视）
+  for(let lane=1;lane<3;lane++){
+    const xTop=centerX-roadTopW/2+roadTopW/3*lane;
+    const xBot=centerX-roadBotW/2+roadBotW/3*lane;
+    ctx.strokeStyle='rgba(232,238,245,.35)';
+    ctx.lineWidth=2;
+    ctx.setLineDash([12,16]);
+    ctx.lineDashOffset=-state.stripeOffset;
+    ctx.beginPath();
+    ctx.moveTo(xTop,roadTopY);
+    ctx.lineTo(xBot,roadBotY);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+}
+
+function drawObstacle(o){
+  const z=o.z;
+  const y=roadY(z);
+  const x=laneX(o.lane,z);
+  const scale=0.25+0.75*(1-z); // 近大远小
+  const cw=44*scale;
+  const ch=(o.type==='truck'?74:56)*scale;
+
+  ctx.save();
+  ctx.translate(x,y);
+  // 车身
+  ctx.fillStyle=o.color;
+  ctx.beginPath();
+  ctx.roundRect(-cw/2,-ch,cw,ch,6*scale);
+  ctx.fill();
+  // 车窗
+  ctx.fillStyle='rgba(10,20,30,.75)';
+  ctx.beginPath();
+  ctx.roundRect(-cw/2+5*scale,-ch+8*scale,cw-10*scale,ch*0.32,4*scale);
+  ctx.fill();
+  // 车轮
+  ctx.fillStyle='#0a0f14';
+  ctx.fillRect(-cw/2-3*scale,-ch*0.32,4*scale,ch*0.22);
+  ctx.fillRect(cw/2-1*scale,-ch*0.32,4*scale,ch*0.22);
+  // 尾灯
+  ctx.fillStyle='#ff4b4b';
+  ctx.fillRect(-cw/2+4*scale,-6*scale,8*scale,4*scale);
+  ctx.fillRect(cw/2-12*scale,-6*scale,8*scale,4*scale);
+  ctx.restore();
+}
+
+function drawPlayer(){
+  const z=0.04;
+  const y=roadY(z);
+  const x=laneX(state.playerLane,z);
+  const cw=62,ch=86;
+
+  ctx.save();
+  ctx.translate(x,y);
+  // 阴影
+  ctx.fillStyle='rgba(0,0,0,.45)';
+  ctx.beginPath();
+  ctx.ellipse(0,4,cw*0.55,10,0,0,Math.PI*2);
+  ctx.fill();
+  // 车身
+  const grad=ctx.createLinearGradient(0,-ch,0,0);
+  grad.addColorStop(0,'#5ee7a0');
+  grad.addColorStop(1,'#1b8a55');
+  ctx.fillStyle=grad;
+  ctx.beginPath();
+  ctx.roundRect(-cw/2,-ch,cw,ch,10);
+  ctx.fill();
+  // 前挡风
+  ctx.fillStyle='rgba(180,230,255,.65)';
+  ctx.beginPath();
+  ctx.roundRect(-cw/2+8,-ch+10,cw-16,ch*0.28,6);
+  ctx.fill();
+  // 车顶条纹
+  ctx.fillStyle='rgba(255,255,255,.25)';
+  ctx.fillRect(-4,-ch+8,8,ch*0.5);
+  // 车轮
+  ctx.fillStyle='#0a0f14';
+  ctx.fillRect(-cw/2-5,-ch*0.72,6,ch*0.24);
+  ctx.fillRect(cw/2-1,-ch*0.72,6,ch*0.24);
+  ctx.fillRect(-cw/2-5,-ch*0.26,6,ch*0.24);
+  ctx.fillRect(cw/2-1,-ch*0.26,6,ch*0.24);
+  // 大灯
+  ctx.fillStyle='#fff3c4';
+  ctx.fillRect(-cw/2+5,-ch+4,12,6);
+  ctx.fillRect(cw/2-17,-ch+4,12,6);
+  ctx.restore();
+}
+
+function update(dt){
+  if(!state.running)return;
+
+  // 速度逐渐提升
+  state.speed=Math.min(1,state.speed+dt*0.06);
+  const pxPerSec=140+state.speed*320;
+  state.stripeOffset=(state.stripeOffset+pxPerSec*dt*0.9)%28;
+
+  // 生成障碍
+  state.spawnTimer-=dt;
+  if(state.spawnTimer<=0){
+    spawnObstacle();
+    state.spawnTimer=Math.max(0.45,1.1-state.speed*0.6);
+  }
+
+  // 障碍逼近
+  for(const o of state.obstacles){
+    o.z-=dt*(0.35+state.speed*0.75);
+  }
+  state.obstacles=state.obstacles.filter(o=>o.z>0);
+
+  // 碰撞检测（z 很小时比较 lane）
+  for(const o of state.obstacles){
+    if(o.z<0.10 && o.lane===state.playerLane){
+      state.running=false;
+      state.best=Math.max(state.best,state.score);
+      localStorage.setItem('racing3d_best',state.best);
+      $('best').textContent=state.best;
+      setTimeout(()=>alert('撞车！得分：'+state.score),60);
+      break;
+    }
+  }
+
+  // 得分
+  state.score+=Math.floor(dt*30*(1+state.speed));
+  $('score').textContent=state.score;
+  $('speed').textContent=Math.floor(60+state.speed*180);
+}
+
+function render(){
+  drawRoad();
+  // 远到近画
+  const sorted=[...state.obstacles].sort((a,b)=>b.z-a.z);
+  for(const o of sorted) drawObstacle(o);
+  drawPlayer();
+}
+
+let last=0;
+function loop(t){
+  if(!last)last=t;
+  const dt=Math.min(0.05,(t-last)/1000);
+  last=t;
+  update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+
+function setDir(dir){
+  if(!state.running)return;
+  if(dir==='left'&&state.playerLane>0)state.playerLane--;
+  if(dir==='right'&&state.playerLane<2)state.playerLane++;
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft')setDir('left');
+  if(e.key==='ArrowRight')setDir('right');
+  if(e.key===' '){reset();}
+});
+document.querySelectorAll('.pad button').forEach(b=>{
+  b.onclick=()=>setDir(b.dataset.dir);
+});
+function reset(){
+  const best=state?state.best:Number(localStorage.getItem('racing3d_best')||0);
+  initState();
+  state.best=best;
+  $('best').textContent=best;
+  $('score').textContent=0;
+  $('speed').textContent=60;
+}
+$('restart').onclick=reset;
+
+initState();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
