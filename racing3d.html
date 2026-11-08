@@ -39,47 +39,45 @@ const $=id=>document.getElementById(id);
 const canvas=$('game'),ctx=canvas.getContext('2d');
 const W=canvas.width,H=canvas.height;
 const roadTopW=120,roadBotW=400,roadTopY=110,roadBotY=H-36,centerX=W/2;
+const USER=localStorage.getItem('game_user')||'guest';
+const SAVE_KEY='racing_best_'+USER;
 
-const USER = localStorage.getItem('game_user') || 'guest';
-const SAVE_KEY = 'racing_best_' + USER;
-
-let state;
+let S=null;
 
 function laneX(lane,z){
-  const t=1-z;
-  const w=roadTopW+(roadBotW-roadTopW)*t;
+  const t=1-z, w=roadTopW+(roadBotW-roadTopW)*t;
   return centerX-w/2+(w/3)*(lane+0.5);
 }
 function roadY(z){return roadTopY+(roadBotY-roadTopY)*z;}
-function roadWidth(z){return roadTopW+(roadBotW-roadTopW)*(1-z);}
 
-function initState(){
-  let best=0;
-  try{ const o=JSON.parse(localStorage.getItem(SAVE_KEY)||'{}'); best=o.best||0; }catch(e){}
-  state={
-    lane:1, targetLane:1, lanePos:1,
-    speed:0, score:0, best:best,
+function loadBest(){
+  try{return JSON.parse(localStorage.getItem(SAVE_KEY)||'{}').best||0;}catch(e){return 0;}
+}
+function saveBest(){
+  if(S.score>S.best){
+    S.best=S.score;
+    localStorage.setItem(SAVE_KEY,JSON.stringify({best:S.best}));
+    $('best').textContent=S.best;
+  }
+}
+
+function init(){
+  S={
+    targetLane:1, lanePos:1,
+    speed:0, score:0, best:loadBest(),
     obstacles:[], stripe:0, running:true,
-    spawnTimer:1.2, shake:0
+    spawnTimer:1.0, acc:0
   };
-  $('best').textContent=best;
+  $('best').textContent=S.best;
   $('score').textContent=0;
   $('speed').textContent=60;
 }
 
-function saveBest(){
-  if(state.score>state.best){
-    state.best=state.score;
-    localStorage.setItem(SAVE_KEY, JSON.stringify({best:state.best}));
-    $('best').textContent=state.best;
-  }
-}
-
 function spawn(){
   const lane=Math.floor(Math.random()*3);
-  if(state.obstacles.some(o=>o.lane===lane&&o.z>0.8))return;
-  state.obstacles.push({
-    lane,z:0.02,
+  if(S.obstacles.some(o=>o.lane===lane&&o.z>0.78))return;
+  S.obstacles.push({
+    lane, z:0.02,
     type:Math.random()<0.18?'truck':'car',
     color:['#e94560','#f5a623','#50e3c2','#4a90e2','#c084fc'][Math.floor(Math.random()*5)]
   });
@@ -116,7 +114,7 @@ function drawRoad(){
     const xTop=centerX-roadTopW/2+roadTopW/3*lane;
     const xBot=centerX-roadBotW/2+roadBotW/3*lane;
     ctx.strokeStyle='rgba(232,238,245,.32)';ctx.lineWidth=2;
-    ctx.setLineDash([12,16]);ctx.lineDashOffset=-state.stripe;
+    ctx.setLineDash([12,16]);ctx.lineDashOffset=-S.stripe;
     ctx.beginPath();ctx.moveTo(xTop,roadTopY);ctx.lineTo(xBot,roadBotY);ctx.stroke();
   }
   ctx.setLineDash([]);
@@ -143,7 +141,7 @@ function drawObstacle(o){
 }
 
 function drawPlayer(){
-  const z=0.05,y=roadY(z),x=laneX(state.lanePos,z);
+  const z=0.05,y=roadY(z),x=laneX(S.lanePos,z);
   const cw=60,ch=84;
   ctx.save();ctx.translate(x,y);
   ctx.fillStyle='rgba(0,0,0,.45)';
@@ -167,76 +165,72 @@ function drawPlayer(){
   ctx.restore();
 }
 
-function update(dt){
-  if(!state.running)return;
+// 固定步长：每 1/60 秒执行一次逻辑，避免不同刷新率导致手感差异
+function step(dt){
+  if(!S.running)return;
 
-  // 平滑变道
-  const diff=state.targetLane-state.lanePos;
-  state.lanePos+=diff*Math.min(1,dt*10);
-  if(Math.abs(diff)<0.01)state.lanePos=state.targetLane;
-  state.lane=Math.round(state.lanePos);
+  const diff=S.targetLane-S.lanePos;
+  S.lanePos+=diff*Math.min(1,dt*9);
+  if(Math.abs(diff)<0.005)S.lanePos=S.targetLane;
 
-  state.speed=Math.min(1,state.speed+dt*0.05);
-  const px=150+state.speed*330;
-  state.stripe=(state.stripe+px*dt*0.9)%28;
+  S.speed=Math.min(1,S.speed+dt*0.035);
+  S.stripe=(S.stripe+(150+S.speed*300)*dt)%28;
 
-  state.spawnTimer-=dt;
-  if(state.spawnTimer<=0){
+  S.spawnTimer-=dt;
+  if(S.spawnTimer<=0){
     spawn();
-    state.spawnTimer=Math.max(0.5,1.15-state.speed*0.55);
+    S.spawnTimer=Math.max(0.55,1.2-S.speed*0.5);
   }
 
-  for(const o of state.obstacles)o.z-=dt*(0.36+state.speed*0.7);
-  state.obstacles=state.obstacles.filter(o=>o.z>0);
+  for(const o of S.obstacles)o.z-=dt*(0.34+S.speed*0.62);
+  S.obstacles=S.obstacles.filter(o=>o.z>0);
 
-  for(const o of state.obstacles){
-    if(o.z<0.10&&o.lane===state.lane){
-      state.running=false;
-      saveBest();
-      setTimeout(()=>alert('撞车！得分：'+state.score),60);
-      break;
+  for(const o of S.obstacles){
+    if(o.z<0.11&&o.lane===Math.round(S.lanePos)){
+      S.running=false;saveBest();
+      setTimeout(()=>alert('撞车！得分：'+S.score),60);
+      return;
     }
   }
 
-  state.score+=Math.floor(dt*32*(1+state.speed));
-  $('score').textContent=state.score;
-  $('speed').textContent=Math.floor(60+state.speed*180);
-  if(state.shake>0)state.shake=Math.max(0,state.shake-dt*3);
+  S.score+=Math.floor(dt*30*(1+S.speed));
+  $('score').textContent=S.score;
+  $('speed').textContent=Math.floor(60+S.speed*180);
 }
 
 function render(){
-  ctx.save();
-  if(state.shake>0){
-    ctx.translate((Math.random()-0.5)*state.shake*6,(Math.random()-0.5)*state.shake*6);
-  }
   drawRoad();
-  const sorted=[...state.obstacles].sort((a,b)=>b.z-a.z);
+  const sorted=[...S.obstacles].sort((a,b)=>b.z-a.z);
   for(const o of sorted)drawObstacle(o);
   drawPlayer();
-  ctx.restore();
 }
 
-let last=0;
+let last=0, acc=0;
 function loop(t){
   if(!last)last=t;
-  const dt=Math.min(0.05,(t-last)/1000);last=t;
-  update(dt);render();requestAnimationFrame(loop);
+  let dt=(t-last)/1000; last=t;
+  if(dt>0.1)dt=0.1;
+  acc+=dt;
+  while(acc>=1/60){ step(1/60); acc-=1/60; }
+  render();
+  requestAnimationFrame(loop);
 }
 
 function setDir(d){
-  if(!state.running)return;
-  if(d==='left'&&state.targetLane>0)state.targetLane--;
-  if(d==='right'&&state.targetLane<2)state.targetLane++;
+  if(!S.running)return;
+  if(d==='left'&&S.targetLane>0)S.targetLane--;
+  if(d==='right'&&S.targetLane<2)S.targetLane++;
 }
 document.addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft')setDir('left');
   if(e.key==='ArrowRight')setDir('right');
-  if(e.key===' ')initState();
+  if(e.key===' ')init();
 });
 document.querySelectorAll('.pad button').forEach(b=>{b.onclick=()=>setDir(b.dataset.dir);});
-$('restart').onclick=initState;
+$('restart').onclick=init;
 
-initState();requestAnimationFrame(loop);
+init();
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
