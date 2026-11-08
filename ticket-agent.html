@@ -75,6 +75,8 @@
 
 <script>
 const $=id=>document.getElementById(id);
+const USER=localStorage.getItem('game_user')||'guest';
+const SAVE_KEY='ticket_save_'+USER;
 const names=['阿列克谢','贝拉','卡洛斯','达莉亚','伊万','法蒂玛','格奥尔基','汉娜','尤里','泽维尔',
 '李明','王芳','佐藤','金敏','拉吉','安娜'];
 const skins=['#f3d0ae','#e0b48c','#c98f5f','#a86b3c','#8a5227','#f7ddc4'];
@@ -83,7 +85,21 @@ const cities=['北京','上海','东京','首尔','新加坡','曼谷','迪拜',
 const rand=a=>a[Math.floor(Math.random()*a.length)];
 const randInt=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 
-let state={money:0,complaints:0,sold:0,current:null,flights:[],selected:null};
+let state=null;
+
+function save(){
+  try{
+    localStorage.setItem(SAVE_KEY,JSON.stringify({
+      money:state.money,complaints:state.complaints,sold:state.sold
+    }));
+  }catch(e){}
+}
+function load(){
+  try{
+    const o=JSON.parse(localStorage.getItem(SAVE_KEY)||'{}');
+    return o;
+  }catch(e){return {};}
+}
 
 function makeFlights(){
   const list=[];const n=randInt(3,4);const used=new Set();
@@ -152,7 +168,8 @@ function sell(){
     state.complaints++;
     $('feedback').innerHTML='<span class="bad">❌ 售票失败：</span>'+issues.join('；');
     $('complaints').textContent=state.complaints;
-    if(state.complaints>=5){setTimeout(()=>{alert('投诉满 5 次，售票窗口关闭。');location.reload();},700);}
+    save();
+    if(state.complaints>=5){setTimeout(()=>{alert('投诉满 5 次，售票窗口关闭。');localStorage.removeItem(SAVE_KEY);location.reload();},700);}
     return;
   }
   const fee=Math.round(f.price*0.15);
@@ -160,6 +177,7 @@ function sell(){
   $('feedback').innerHTML='<span class="good">✅ 售票成功！</span> 佣金 +$'+fee+'。';
   $('money').textContent='$'+state.money;
   $('sold').textContent=state.sold;
+  save();
   nextPassenger();
 }
 function refuse(){
@@ -170,7 +188,8 @@ function refuse(){
       state.complaints++;
       $('feedback').innerHTML='<span class="bad">❌ 拒绝错误：</span>这单其实可以卖。投诉 +1。';
       $('complaints').textContent=state.complaints;
-      if(state.complaints>=5){setTimeout(()=>{alert('投诉满 5 次，售票窗口关闭。');location.reload();},700);}
+      save();
+      if(state.complaints>=5){setTimeout(()=>{alert('投诉满 5 次，售票窗口关闭。');localStorage.removeItem(SAVE_KEY);location.reload();},700);}
       return;
     }
   }
@@ -184,9 +203,23 @@ function nextPassenger(){
   $('sell').disabled=true;
   renderPassenger();renderFlights();
 }
-$('sell').onclick=sell;
-$('refuse').onclick=refuse;
-nextPassenger();
+
+function start(){
+  const saved=load();
+  state={
+    money:saved.money||0,
+    complaints:saved.complaints||0,
+    sold:saved.sold||0,
+    current:null,flights:[],selected:null
+  };
+  $('money').textContent='$'+state.money;
+  $('complaints').textContent=state.complaints;
+  $('sold').textContent=state.sold;
+  $('sell').onclick=sell;
+  $('refuse').onclick=refuse;
+  nextPassenger();
+}
+start();
 </script>
 </body>
 </html>
