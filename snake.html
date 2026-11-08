@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>贪吃蛇</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;background:#0a0f14;color:#e8eef5;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:10px;padding:12px;user-select:none}
+  h1{font-size:19px;letter-spacing:3px;color:#5ee7a0}
+  #info{font-size:13.5px;color:#9fb3c8}
+  canvas{background:#111820;border:2px solid #2a3a4a;border-radius:10px;max-width:100%;touch-action:none}
+  .pad{display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(2,48px);
+    gap:6px;margin-top:4px}
+  .pad button{border:1px solid rgba(94,231,160,.35);background:rgba(94,231,160,.08);color:#5ee7a0;
+    border-radius:10px;font-size:20px;cursor:pointer;transition:.12s}
+  .pad button:active{background:rgba(94,231,160,.25);transform:scale(.96)}
+  .pad .up{grid-column:2}.pad .left{grid-column:1;grid-row:2}
+  .pad .down{grid-column:2;grid-row:2}.pad .right{grid-column:3;grid-row:2}
+  .hint{font-size:11.5px;color:#5a7a96;text-align:center;line-height:1.5}
+  #restart{padding:8px 18px;border:none;border-radius:9px;background:#2fbf74;color:#06121b;
+    font-weight:700;cursor:pointer;letter-spacing:1px}
+</style>
+</head>
+<body>
+  <h1>🐍 贪吃蛇</h1>
+  <div id="info">得分：0 · 方向键或下方按钮控制</div>
+  <canvas id="game" width="400" height="400"></canvas>
+  <div class="pad">
+    <button class="up" data-dir="up">▲</button>
+    <button class="left" data-dir="left">◀</button>
+    <button class="down" data-dir="down">▼</button>
+    <button class="right" data-dir="right">▶</button>
+  </div>
+  <div class="hint">撞墙或撞自己结束 · 按空格或点“重开”重新开始</div>
+  <button id="restart">重开</button>
+
+<script>
+const $=id=>document.getElementById(id);
+const canvas=$('game'),ctx=canvas.getContext('2d');
+const grid=20,cols=canvas.width/grid,rows=canvas.height/grid;
+let snake,dir,food,score,timer,over;
+function init(){
+  snake=[{x:5,y:5}];dir={x:1,y:0};score=0;over=false;
+  placeFood();updateInfo();clearInterval(timer);timer=setInterval(step,120);draw();
+}
+function placeFood(){
+  do{food={x:Math.floor(Math.random()*cols),y:Math.floor(Math.random()*rows)};}
+  while(snake.some(s=>s.x===food.x&&s.y===food.y));
+}
+function updateInfo(){$('info').textContent='得分：'+score+' · 方向键或下方按钮控制';}
+function step(){
+  if(over)return;
+  const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+  if(head.x<0||head.x>=cols||head.y<0||head.y>=rows||snake.some(s=>s.x===head.x&&s.y===head.y)){
+    over=true;clearInterval(timer);setTimeout(()=>alert('游戏结束！得分：'+score),50);return;
+  }
+  snake.unshift(head);
+  if(head.x===food.x&&head.y===food.y){score++;updateInfo();placeFood();}else snake.pop();
+  draw();
+}
+function draw(){
+  ctx.fillStyle='#111820';ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#e74c3c';ctx.fillRect(food.x*grid,food.y*grid,grid-2,grid-2);
+  snake.forEach((s,i)=>{ctx.fillStyle=i===0?'#27ae60':'#2ecc71';
+    ctx.fillRect(s.x*grid,s.y*grid,grid-2,grid-2);});
+}
+function setDir(d){
+  if(d==='up'&&dir.y===0)dir={x:0,y:-1};
+  if(d==='down'&&dir.y===0)dir={x:0,y:1};
+  if(d==='left'&&dir.x===0)dir={x:-1,y:0};
+  if(d==='right'&&dir.x===0)dir={x:1,y:0};
+}
+document.addEventListener('keydown',e=>{
+  if(e.key===' '){init();return;}
+  if(e.key==='ArrowUp')setDir('up');
+  if(e.key==='ArrowDown')setDir('down');
+  if(e.key==='ArrowLeft')setDir('left');
+  if(e.key==='ArrowRight')setDir('right');
+});
+document.querySelectorAll('.pad button').forEach(b=>{b.onclick=()=>setDir(b.dataset.dir);});
+$('restart').onclick=init;
+init();
+</script>
+</body>
+</html>
