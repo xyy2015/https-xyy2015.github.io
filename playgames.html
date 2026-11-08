@@ -49,8 +49,8 @@
   <h2>🔒 账号登录</h2>
   <p>输入账号和邀请码进入大厅。账号和邀请码必须匹配。</p>
   <div class="row">
-    <input id="acc" placeholder="账号（如 xyy）" autocomplete="off">
-    <input id="code" placeholder="邀请码（如 2015）" autocomplete="off">
+    <input id="acc" placeholder="输入账号" autocomplete="off">
+    <input id="code" placeholder="输入邀请码" autocomplete="off">
   </div>
   <div class="row"><button id="enter">进入</button></div>
   <div id="msg"></div>
@@ -84,10 +84,10 @@
     </a>
     <a class="card" href="breakout.html">
       <div class="icon">🧱</div>
-      <h2>打砖块</h2>
-      <p>移动挡板接球，打掉所有砖块。</p>
+      <h2>打砖块 · 50 关</h2>
+      <p>50 个关卡，砖块耐久和球速逐关提升。</p>
       <div class="save" id="save-breakout">存档：无</div>
-      <div class="tag">街机</div>
+      <div class="tag">街机 · 闯关</div>
     </a>
     <a class="card" href="racing3d.html">
       <div class="icon">🏎️</div>
@@ -101,7 +101,6 @@
 </div>
 
 <script>
-/* 账号 → 邀请码 映射 */
 const ACCOUNTS = {
   'xyy': '2015',
   '001': '100',
@@ -120,14 +119,8 @@ const ACCOUNTS = {
   function login(){
     var a = accInput.value.trim();
     var c = codeInput.value.trim();
-    if(!ACCOUNTS[a]){
-      msg.textContent = '账号不存在。';
-      return;
-    }
-    if(ACCOUNTS[a] !== c){
-      msg.textContent = '邀请码与账号不匹配。';
-      return;
-    }
+    if(!ACCOUNTS[a]){ msg.textContent = '账号不存在。'; return; }
+    if(ACCOUNTS[a] !== c){ msg.textContent = '邀请码与账号不匹配。'; return; }
     localStorage.setItem('game_user', a);
     showHall(a);
   }
@@ -144,18 +137,14 @@ const ACCOUNTS = {
       'save-border': ['border_save_', '边境检查站'],
       'save-ticket': ['ticket_save_', '飞机售票员'],
       'save-snake': ['snake_best_', '贪吃蛇'],
-      'save-breakout': ['breakout_best_', '打砖块'],
+      'save-breakout': ['breakout_save_', '打砖块'],
       'save-racing': ['racing_best_', '3D 赛车']
     };
     Object.keys(map).forEach(function(id){
-      var key = map[id][0] + a;
-      var v = localStorage.getItem(key);
+      var v = localStorage.getItem(map[id][0] + a);
       var el = document.getElementById(id);
-      if(v === null || v === ''){
-        el.textContent = '存档：无';
-      }else{
-        el.textContent = '存档：' + formatSave(map[id][1], v);
-      }
+      if(v === null || v === ''){ el.textContent = '存档：无'; return; }
+      el.textContent = '存档：' + formatSave(map[id][1], v);
     });
   }
 
@@ -165,7 +154,7 @@ const ACCOUNTS = {
       if(game === '边境检查站') return '第 ' + (o.day||1) + ' 天 · $' + (o.money||0);
       if(game === '飞机售票员') return '$' + (o.money||0) + ' · 售 ' + (o.sold||0);
       if(game === '贪吃蛇') return '最高 ' + (o.best||0) + ' 分';
-      if(game === '打砖块') return '最高 ' + (o.best||0) + ' 分';
+      if(game === '打砖块') return '第 ' + (o.level||1) + ' 关 · 最高 ' + (o.best||0) + ' 分';
       if(game === '3D 赛车') return '最高 ' + (o.best||0) + ' 分';
     }catch(e){}
     return '有存档';
@@ -180,13 +169,9 @@ const ACCOUNTS = {
     location.reload();
   };
 
-  // 自动登录
   var saved = localStorage.getItem('game_user');
-  if(saved && ACCOUNTS[saved]){
-    showHall(saved);
-  }else{
-    accInput.focus();
-  }
+  if(saved && ACCOUNTS[saved]){ showHall(saved); }
+  else{ accInput.focus(); }
 })();
 </script>
 </body>
