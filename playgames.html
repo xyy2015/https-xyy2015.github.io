@@ -47,7 +47,7 @@
 
 <div id="lock">
   <h2>🔒 账号登录</h2>
-  <p>输入账号和邀请码进入大厅。账号和邀请码必须匹配。</p>
+  <p>请输入账号和邀请码进入大厅。</p>
   <div class="row">
     <input id="acc" placeholder="输入账号" autocomplete="off">
     <input id="code" placeholder="输入邀请码" autocomplete="off">
@@ -94,13 +94,12 @@
 </div>
 
 <script>
-const ACCOUNTS = {
-  'xyy': '2015',
-  '001': '100',
-  '002': '200',
-  '003': '300',
-  '004': '400'
-};
+/* 账号：xyy + 001~101，邀请码 = 账号数字反转；xyy 固定 2015 */
+var ACCOUNTS = { "xyy": "2015" };
+for(var i=1;i<=101;i++){
+  var k = String(i).padStart(3,"0");
+  ACCOUNTS[k] = k.split("").reverse().join("");
+}
 
 (function(){
   var lock = document.getElementById('lock');
